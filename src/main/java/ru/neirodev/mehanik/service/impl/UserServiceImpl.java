@@ -10,6 +10,7 @@ import ru.neirodev.mehanik.mapper.UserMapper;
 import ru.neirodev.mehanik.repository.UserRepository;
 import ru.neirodev.mehanik.service.UserService;
 
+import javax.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
 import java.util.Optional;
 
@@ -59,7 +60,7 @@ public class UserServiceImpl implements UserService {
             } catch (IllegalAccessException e) {
                 throw new RuntimeException("Поле не изменено из-за ошибки", e);
             }
-        }
+        } else throw new EntityNotFoundException("Пользователь с таким id не найден");
     }
 
     @Transactional

@@ -1,10 +1,12 @@
 package ru.neirodev.mehanik.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,8 +32,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @Operation(summary = "Создание пользователя",
-            description = "Создать пользователя")
+    @Operation(summary = "Создание пользователя")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
             description = "Созданный пользователь",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)))
@@ -45,13 +46,13 @@ public class UserController {
         }
     }
 
-    @Operation(summary = "Обновление нескольких полей пользователя(обновятся все, которые не null у входящего обьекта)",
-            description = "Обновить пользователя ")
+    @Operation(summary = "Обновление нескольких полей пользователя(обновятся все, которые не null у входящего обьекта)")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_ACCEPTED)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким id не найден")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @PutMapping("")
-    public ResponseEntity<?> update(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> update(
+            @RequestBody UserDTO userDTO) {
         try {
             Optional<User> repUser = userService.getById(userDTO.getId());
             if (repUser.isPresent()) {
@@ -65,8 +66,7 @@ public class UserController {
         }
     }
 
-    @Operation(summary = "Обновление одного поля пользователя",
-            description = "Обновить пользователя ")
+    @Operation(summary = "Обновление одного поля пользователя")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_ACCEPTED)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR, description = "Поле не существует")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR, description = "Поле не изменено из-за ошибки")
@@ -83,14 +83,15 @@ public class UserController {
         }
     }
 
-    @Operation(summary = "Получение пользователя по id",
-            description = "Получить пользователя")
+    @Operation(summary = "Получение пользователя по id")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
             description = "Пользователь",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)))
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким id не найден")
     @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable Long id) {
+    public ResponseEntity<?> getById(
+            @Parameter(description = "Идентификатор пользователя", required = true)
+            @PathVariable Long id) {
         Optional<User> repUser = userService.getById(id);
         if (repUser.isPresent()) {
             return ResponseEntity.ok().body(repUser.get());
@@ -98,12 +99,13 @@ public class UserController {
         return new ResponseEntity<>("Пользователь с таким id не найден", NOT_FOUND);
     }
 
-    @Operation(summary = "Получение пользователя по id",
-            description = "Получить пользователя")
+    @Operation(summary = "Получение пользователя по id")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким id не найден")
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteById(@PathVariable Long id) {
+    public ResponseEntity<?> deleteById(
+            @Parameter(description = "Идентификатор пользователя", required = true)
+            @PathVariable Long id) {
         Optional<User> repUser = userService.getById(id);
         if (repUser.isPresent()) {
             userService.delete(repUser.get());

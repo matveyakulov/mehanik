@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.neirodev.mehanik.api.model.GetMakesResponse;
+import ru.neirodev.mehanik.api.model.Make;
+import ru.neirodev.mehanik.api.model.Model;
 import ru.neirodev.mehanik.api.service.ApiService;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -23,7 +23,12 @@ public class ApiController {
     }
 
     @GetMapping("/makes")
-    public GetMakesResponse getMakes(@RequestParam String group){
-        return apiService.sendGetMakesRequest(group);
+    public List<Make> getMakes(@RequestParam final String group){
+        return apiService.getMakesRequest(group);
+    }
+
+    @GetMapping("/models")
+    public List<Model> getModels(@RequestParam final Long make, @RequestParam final String group){
+        return apiService.getModelsRequest(make, group);
     }
 }

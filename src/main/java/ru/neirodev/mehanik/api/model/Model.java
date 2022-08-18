@@ -9,9 +9,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Make {
+public class Model {
 
-    private Long makeId;
+    private Long modelId;
 
-    private String makeName;
+    private String modelName;
 }

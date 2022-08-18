@@ -1,23 +1,23 @@
 package ru.neirodev.mehanik.api.model;
 
 import lombok.SneakyThrows;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
+
+import static ru.neirodev.mehanik.util.RestUtils.PARTSAPI_RU_API_PHP;
+
 
 public abstract class Request {
 
     @SneakyThrows
-    public Map<String, String> toMap() {
-        Map<String, String> params = new HashMap<>();
+    public String getUri() {
+        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromHttpUrl(PARTSAPI_RU_API_PHP);
         Field[] fields = this.getClass().getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true);
-            params.put(field.getName(), (String) field.get(this));
+            uriComponentsBuilder.queryParam(field.getName(), field.get(this));
         }
-        return params;
+        return uriComponentsBuilder.encode().toUriString();
     }
 }

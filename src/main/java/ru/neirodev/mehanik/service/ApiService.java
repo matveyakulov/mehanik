@@ -1,5 +1,6 @@
-package ru.neirodev.mehanik.api.service;
+package ru.neirodev.mehanik.service;
 
+import ru.neirodev.mehanik.api.model.Car;
 import ru.neirodev.mehanik.api.model.Make;
 import ru.neirodev.mehanik.api.model.Model;
 
@@ -11,5 +12,5 @@ public interface ApiService {
 
     List<Model> getModelsRequest(Long make, String group);
 
-    List<Model> getCarsRequest(Long make, Long model, String group);
+    List<Car> getCarsRequest(Long make, Long model, String group);
 }

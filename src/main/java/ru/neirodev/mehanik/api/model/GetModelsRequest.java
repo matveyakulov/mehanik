@@ -1,7 +1,6 @@
 package ru.neirodev.mehanik.api.model;
 
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
 
 @Data
 public class GetModelsRequest extends Request {
@@ -12,7 +11,6 @@ public class GetModelsRequest extends Request {
 
     private String group;
 
-    @Value("${partsapi.getModels.key}")
     private String key;
 
 }

@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Set;
 
 /**
  * @author Minu <<a href=minu-moto@mail.ru>minu-moto@mail.ru</a>>
@@ -35,8 +32,8 @@ public class JwtTokenUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<String> getPermsFromToken(String token) {
-        return (Collection<String>) getAllClaimsFromToken(token).get("perms");
+    public String getPermsFromToken(String token) {
+        return (String) getAllClaimsFromToken(token).get("role");
     }
 
     public Date getExpirationDateFromToken(String token) {
@@ -51,13 +48,14 @@ public class JwtTokenUtil {
         Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
     }
 
-    public String generateToken(long userId, String login, String issuer) {
+    public String generateToken(long userId, String login, String issuer, String role) {
         Claims claims = Jwts.claims();
 		claims.setSubject(login);
 		claims.setIssuer(issuer);
 		claims.setIssuedAt(new Date());
 		claims.setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_MINUTES * 60 * 1000));
         claims.put("uid", userId);
+        claims.put("role", role);
 
         return Jwts.builder()
         		.setHeaderParam(Header.TYPE, Header.JWT_TYPE)

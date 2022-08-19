@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.WebUtils;
 import org.webjars.NotFoundException;
+import ru.neirodev.mehanik.entity.User;
 import ru.neirodev.mehanik.entity.security.Session;
 import ru.neirodev.mehanik.repository.SessionRepository;
 import ru.neirodev.mehanik.repository.UserRepository;
@@ -13,10 +14,11 @@ import ru.neirodev.mehanik.security.JwtTokenUtil;
 import ru.neirodev.mehanik.service.AuthService;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static ru.neirodev.mehanik.security.JwtFilter.COOKIE_NAME;
 
@@ -38,44 +40,36 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     @Override
-    public Session login(String login, String password) {
-        Long uid = staffRepository.login(login, password);
-        Optional<Staff> usr = null;
+    public Session login(String login, String password, HttpServletRequest request, HttpServletResponse response) {
+        Long uid = userRepository.login(login, password);
+        Optional<User> user = null;
         if (uid != null)
-            usr = staffRepository.findById(uid);
-        if ((usr == null) || usr.isEmpty())
+            user = userRepository.findById(uid);
+        if ((user == null) || user.isEmpty())
             throw new NotFoundException("Пользователь не найден");
-        if (!usr.get().getStatus().equals(Status.ACTIVE))
-            throw new BadRequestException("Доступ запрещен");
 
         Session session = new Session();
-        session.setTuserId(uid);
-        refreshSession(session, usr.get());
+        session.setUserId(uid);
+        refreshSession(session, user.get(), request, response);
         return session;
     }
 
-    private void refreshSession(Session session, Staff usr) {
-        session.setAccessToken(jwtTokenUtil.generateToken(usr.getPerson().getId(), usr.getLogin(), request.getRequestURL().toString(),
-                ((usr.getRole() != null) && (usr.getRole().getPermissions() != null))
-                        ? usr.getRole().getPermissions().stream().map(Permission::getPerm).collect(Collectors.toSet())
-                        : null));
+    private void refreshSession(Session session, User user, HttpServletRequest request, HttpServletResponse response) {
+        session.setAccessToken(jwtTokenUtil.generateToken(user.getId(), user.getPhone(),
+                request.getRequestURL().toString(), user.getRole().getName()));
         session.setRefreshToken(UUID.randomUUID().toString());
         session.setUseragent(request.getHeader(HttpHeaders.USER_AGENT));
         String remoteAddr = request.getHeader("X-Forwarded-For");
         if (remoteAddr == null)
             remoteAddr = request.getRemoteAddr();
-        session.setUserip(remoteAddr);
+        session.setUserIp(remoteAddr);
         session.setLastLogin(new Date());
         sessionRepository.save(session);
 
         Cookie cookie = new Cookie(COOKIE_NAME, session.getAccessToken());
         cookie.setPath("/");
-        // кука живет ACCESS_TOKEN_VALIDITY минут
-        cookie.setMaxAge(JwtTokenUtil.ACCESS_TOKEN_VALIDITY * 60);
-        // кука используется только в запросах, через JavaScript получить её нельзя
+        cookie.setMaxAge(JwtTokenUtil.ACCESS_TOKEN_VALIDITY_MINUTES * 60);
         cookie.setHttpOnly(true);
-        // если соединение защищённое, то устанавливаем куке флаг чтоб не светить её в
-        // незащищённых соединениях
         if ("https".equalsIgnoreCase(request.getScheme()))
             cookie.setSecure(true);
         response.addCookie(cookie);
@@ -83,18 +77,18 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     @Override
-    public Session refreshToken(String refreshToken) throws Exception {
+    public Session refreshToken(String refreshToken, HttpServletRequest request, HttpServletResponse response) {
         Optional<Session> session = sessionRepository.findSessionByRefreshToken(refreshToken);
-        if (session.isEmpty())
-            throw new NotFoundException("Сессия с данным refresh token'ом не найдена");
-
-        refreshSession(session.get(), staffRepository.findById(session.get().getTuserId()).get());
+        if (session.isEmpty()) {
+            return null;
+        }
+        refreshSession(session.get(), userRepository.findById(session.get().getUserId()).get(), request, response);
         return session.get();
     }
 
     @Transactional
     @Override
-    public void logout() throws Exception {
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
         Cookie cookie = WebUtils.getCookie(request, COOKIE_NAME);
         String accessToken = (cookie != null) ? cookie.getValue() : null;
         Optional<Session> session = sessionRepository.findSessionByAccessToken(accessToken);

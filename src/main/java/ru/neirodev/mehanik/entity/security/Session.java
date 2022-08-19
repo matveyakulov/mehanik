@@ -18,7 +18,7 @@ import java.util.Date;
 @Data
 @Entity
 @Where(clause = "not del")
-@Table(schema = "users", name = "tsessions")
+@Table(schema = "users", name = "sessions")
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @Schema(description = "Сессия пользователя")
@@ -27,24 +27,27 @@ public class Session extends BaseEntity {
     @JsonIgnore
     @Schema(description = "Метка для удалённых записей", accessMode = Schema.AccessMode.READ_ONLY)
     private boolean del = false;
+
     @JsonIgnore
     @CreationTimestamp
     @Schema(description = "Дата и время создания записи", accessMode = Schema.AccessMode.READ_ONLY)
     private Date dateCreate;
+
     @JsonIgnore
     @UpdateTimestamp
     @Schema(description = "Дата и время последнего изменения записи", accessMode = Schema.AccessMode.READ_ONLY)
     private Date dateUpdate;
+
     @JsonIgnore
-    @Column(name = "last_tuser_id")
+    @Column(name = "last_user_id")
     @Schema(description = "Идентификатор пользователя, изменившего запись", accessMode = Schema.AccessMode.READ_ONLY)
     private Long lastUserId;
 
-    private Long tuserId;
+    private Long userId;
     private String accessToken;
     private String refreshToken;
     private Date lastLogin;
     private String useragent;
-    private String userip;
+    private String userIp;
 
 }

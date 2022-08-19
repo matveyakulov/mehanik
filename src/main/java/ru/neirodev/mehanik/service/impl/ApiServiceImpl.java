@@ -11,7 +11,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import ru.neirodev.mehanik.api.model.*;
+import ru.neirodev.mehanik.api.model.Car;
+import ru.neirodev.mehanik.api.model.Make;
+import ru.neirodev.mehanik.api.model.Model;
+import ru.neirodev.mehanik.api.request.GetCarsRequest;
+import ru.neirodev.mehanik.api.request.GetMakesRequest;
+import ru.neirodev.mehanik.api.request.GetModelsRequest;
 import ru.neirodev.mehanik.service.ApiService;
 
 import javax.annotation.PostConstruct;
@@ -41,6 +46,7 @@ public class ApiServiceImpl implements ApiService {
         restTemplate = new RestTemplate();
     }
 
+    @Cacheable(value = "makes", key = "#group")
     @SneakyThrows
     @Override
     public List<Make> getMakesRequest(String group) {

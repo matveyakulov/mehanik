@@ -1,4 +1,4 @@
-package ru.neirodev.mehanik.api.model;
+package ru.neirodev.mehanik.api.request;
 
 import lombok.Data;
 

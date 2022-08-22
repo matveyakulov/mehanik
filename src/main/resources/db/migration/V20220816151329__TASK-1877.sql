@@ -15,4 +15,3 @@ CREATE TABLE IF NOT EXISTS core.users
     photo      varchar                                              NULL,
     CONSTRAINT users_pk PRIMARY KEY (id)
 );
-

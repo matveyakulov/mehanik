@@ -5,9 +5,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.neirodev.mehanik.dto.SetFieldRequest;
 import ru.neirodev.mehanik.dto.UserDTO;
-import ru.neirodev.mehanik.dto.UserRatingDTO;
 import ru.neirodev.mehanik.entity.User;
+import ru.neirodev.mehanik.entity.UserRating;
 import ru.neirodev.mehanik.mapper.UserMapper;
+import ru.neirodev.mehanik.repository.UserRatingRepository;
 import ru.neirodev.mehanik.repository.UserRepository;
 import ru.neirodev.mehanik.service.UserService;
 
@@ -20,10 +21,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
+    private final UserRatingRepository userRatingRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserRatingRepository userRatingRepository) {
         this.userRepository = userRepository;
+        this.userRatingRepository = userRatingRepository;
     }
 
     @Transactional(readOnly = true)
@@ -73,7 +76,26 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     @Override
     public double getRatingById(Long id) {
-        UserRatingDTO userRatingDTO = userRepository.getValuesByUserToId(id);
-        return userRatingDTO.getSum() / userRatingDTO.getCount();
+        return userRatingRepository.sumByUserToId(id) / userRatingRepository.countByUserToId(id);
+    }
+
+    @Transactional
+    @Override
+    public void addRatingRow(Long id, Double value) {
+        UserRating userRating = new UserRating();
+        userRating.setUserToId(id);
+        userRating.setValue(value);
+        // TODO после готовой авторизации
+//        Long userFromId = (Long) SecurityContextHolder.getContext().getAuthentication();
+//        userRating.setUserFromId(userFromId);
+        userRatingRepository.save(userRating);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<UserRating> getRatingRowByUserToId(Long userToId) {
+        // TODO после готовой авторизации
+//        Long userFromId = (Long) SecurityContextHolder.getContext().getAuthentication();
+        return userRatingRepository.findUserRatingByUserFromIdAndUserToId(userFromId, userToId);
     }
 }

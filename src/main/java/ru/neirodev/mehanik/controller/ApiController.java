@@ -5,9 +5,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.neirodev.mehanik.api.model.Car;
 import ru.neirodev.mehanik.api.model.Make;
 import ru.neirodev.mehanik.api.model.Model;
-import ru.neirodev.mehanik.api.service.ApiService;
+import ru.neirodev.mehanik.service.ApiService;
 
 import java.util.List;
 
@@ -30,5 +31,10 @@ public class ApiController {
     @GetMapping("/models")
     public List<Model> getModels(@RequestParam final Long make, @RequestParam final String group){
         return apiService.getModelsRequest(make, group);
+    }
+
+    @GetMapping("/cars")
+    public List<Car> getCars(@RequestParam final Long make, @RequestParam final Long model, @RequestParam final String group){
+        return apiService.getCarsRequest(make, model, group);
     }
 }

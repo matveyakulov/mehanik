@@ -16,10 +16,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @WebFilter(asyncSupported = true)
 @Component
@@ -45,11 +43,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             if ((encodedJwtToken != null) && !encodedJwtToken.isEmpty()) {
-                Collection<String> perms = jwtTokenUtil.getPermsFromToken(encodedJwtToken);
-                Set<SimpleGrantedAuthority> authorities = perms.stream()
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toSet());
-                SecurityContextHolder.getContext().setAuthentication(new JwtAuthentication(true, jwtTokenUtil.getUserIdFromToken(encodedJwtToken), authorities));
+                String role = jwtTokenUtil.getPermsFromToken(encodedJwtToken);
+                SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role);
+                SecurityContextHolder.getContext().setAuthentication(new JwtAuthentication(true,
+                        jwtTokenUtil.getUserIdFromToken(encodedJwtToken), Set.of(authority)));
             } else
                 SecurityContextHolder.getContext().setAuthentication(new JwtAuthentication(true, null, new HashSet<>()));
         } catch (ExpiredJwtException ex) {

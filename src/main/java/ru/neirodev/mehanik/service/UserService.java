@@ -17,4 +17,6 @@ public interface UserService {
     void setField(SetFieldRequest request);
 
     void update(UserDTO userDTO, User user);
+
+    double getRatingById(Long id);
 }

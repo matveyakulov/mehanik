@@ -111,4 +111,20 @@ public class UserController {
         }
         return new ResponseEntity<>("Пользователь с таким id не найден", NOT_FOUND);
     }
+
+    @Operation(summary = "Получение пользователя по id")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
+            description = "Пользователь",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)))
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким id не найден")
+    @GetMapping("/{id}/rating")
+    public ResponseEntity<?> getRatingById(
+            @Parameter(description = "Идентификатор пользователя", required = true)
+            @PathVariable Long id) {
+        Optional<User> repUser = userService.getById(id);
+        if (repUser.isPresent()) {
+            return ResponseEntity.ok().body(userService.getRatingById(id));
+        }
+        return new ResponseEntity<>("Пользователь с таким id не найден", NOT_FOUND);
+    }
 }

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.neirodev.mehanik.dto.SetFieldRequest;
 import ru.neirodev.mehanik.dto.UserDTO;
+import ru.neirodev.mehanik.dto.UserRatingDTO;
 import ru.neirodev.mehanik.entity.User;
 import ru.neirodev.mehanik.mapper.UserMapper;
 import ru.neirodev.mehanik.repository.UserRepository;
@@ -67,5 +68,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public void update(UserDTO userDTO, User user) {
         UserMapper.INSTANCE.updateUserFromDTO(userDTO, user);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public double getRatingById(Long id) {
+        UserRatingDTO userRatingDTO = userRepository.getValuesByUserToId(id);
+        return userRatingDTO.getSum() / userRatingDTO.getCount();
     }
 }

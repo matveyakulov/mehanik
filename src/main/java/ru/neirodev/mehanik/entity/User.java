@@ -31,10 +31,6 @@ public class User extends BaseEntity {
     @Schema(description = "Рейтинг", accessMode = Schema.AccessMode.READ_ONLY)
     private Double rating = 0.0;
 
-    @Schema(description = "Количество оценок", accessMode = Schema.AccessMode.READ_ONLY)
-    @Column(name = "count_rating")
-    private Long countRating = 0L;
-
     @Schema(description = "true - компания, false - частное лицо")
     @Column(name = "is_company")
     private Boolean isCompany;

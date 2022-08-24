@@ -13,4 +13,6 @@ public interface ApiService {
     List<Car> getCarsRequest(Long make, Long model, String group);
 
     List<CarPart> carPartsList(String typeid, String kid);
+
+    List<VinDecode> vinDecodeShort(String vin);
 }

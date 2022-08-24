@@ -13,6 +13,6 @@ public class GetCarsRequest extends Request {
 
     private String group;
 
-    private String key = "7e48fd1da37cc5131488c3b37507cf79";
+    private String key;
 
 }

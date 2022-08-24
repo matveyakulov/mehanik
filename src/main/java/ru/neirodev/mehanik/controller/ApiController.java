@@ -5,10 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.neirodev.mehanik.api.model.Car;
-import ru.neirodev.mehanik.api.model.CarPart;
-import ru.neirodev.mehanik.api.model.Make;
-import ru.neirodev.mehanik.api.model.Model;
+import ru.neirodev.mehanik.api.model.*;
 import ru.neirodev.mehanik.service.ApiService;
 
 import java.util.List;
@@ -42,5 +39,10 @@ public class ApiController {
     @GetMapping("/carParts")
     public List<CarPart> carPartsList(@RequestParam final String typeid, @RequestParam final String kid){
         return apiService.carPartsList(typeid, kid);
+    }
+
+    @GetMapping("/vinDecode")
+    public List<VinDecode> vinDecodeShort(@RequestParam final String vin){
+        return apiService.vinDecodeShort(vin);
     }
 }

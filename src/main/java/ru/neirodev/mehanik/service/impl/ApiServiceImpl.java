@@ -1,8 +1,8 @@
 package ru.neirodev.mehanik.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -11,12 +11,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import ru.neirodev.mehanik.api.model.Car;
-import ru.neirodev.mehanik.api.model.Make;
-import ru.neirodev.mehanik.api.model.Model;
-import ru.neirodev.mehanik.api.request.GetCarsRequest;
-import ru.neirodev.mehanik.api.request.GetMakesRequest;
-import ru.neirodev.mehanik.api.request.GetModelsRequest;
+import ru.neirodev.mehanik.api.model.*;
+import ru.neirodev.mehanik.api.request.*;
 import ru.neirodev.mehanik.service.ApiService;
 
 import javax.annotation.PostConstruct;
@@ -26,11 +22,14 @@ import java.util.List;
 
 import static org.springframework.http.HttpMethod.GET;
 import static ru.neirodev.mehanik.util.RestUtils.deleteAttributes;
+import static ru.neirodev.mehanik.util.RestUtils.getCarParts;
 
 @Service
 public class ApiServiceImpl implements ApiService {
 
     private RestTemplate restTemplate;
+
+    private ObjectMapper objectMapper;
 
     @Value("${partsapi.getMakes.key}")
     private String getMakesKey;
@@ -41,53 +40,54 @@ public class ApiServiceImpl implements ApiService {
     @Value("${partsapi.getCars.key}")
     private String getCarsKey;
 
+    @Value("${partsapi.carPartsList.key}")
+    private String carPartsListKey;
+
     @PostConstruct
     public void init() {
         restTemplate = new RestTemplate();
+        objectMapper = new ObjectMapper();
     }
 
     @Cacheable(value = "makes", key = "#group")
-    @SneakyThrows
     @Override
     public List<Make> getMakesRequest(String group) {
         GetMakesRequest request = new GetMakesRequest();
         request.setGroup(group);
         request.setKey(getMakesKey);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.ACCEPT, MediaType.TEXT_HTML_VALUE);
-        HttpEntity<?> entity = new HttpEntity<>(headers);
-        String body = restTemplate.exchange(request.getUri(), GET, entity, String.class, new HashMap<>()).getBody();
-        body = body != null ? body.replace('\'', '\"') : null;
+        String body = getBodyFromRequest(request);
         if (body != null) {
-            return new ObjectMapper().readValue(body, new TypeReference<>() {
-            });
+            try {
+                return new ObjectMapper().readValue(body, new TypeReference<>() {
+                });
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
         }
         return Collections.emptyList();
     }
 
     @Cacheable(value = "models", key = "#make")
-    @SneakyThrows
     @Override
     public List<Model> getModelsRequest(Long make, String group) {
         GetModelsRequest request = new GetModelsRequest();
         request.setMake(make);
         request.setGroup(group);
         request.setKey(getModelsKey);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.ACCEPT, MediaType.TEXT_HTML_VALUE);
-        HttpEntity<?> entity = new HttpEntity<>(headers);
-        String body = restTemplate.exchange(request.getUri(), GET, entity, String.class, new HashMap<>()).getBody();
-        body = body != null ? body.replace('\'', '\"') : null;
+        String body = getBodyFromRequest(request);
         if (body != null) {
-            return new ObjectMapper().readValue(body, new TypeReference<>() {
-            });
+            try {
+                return new ObjectMapper().readValue(body, new TypeReference<>() {
+                });
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
         }
         return Collections.emptyList();
 
     }
 
     @Cacheable(value = "cars", key = "#model")
-    @SneakyThrows
     @Override
     public List<Car> getCarsRequest(Long make, Long model, String group) {
         GetCarsRequest request = new GetCarsRequest();
@@ -95,18 +95,44 @@ public class ApiServiceImpl implements ApiService {
         request.setModel(model);
         request.setGroup(group);
         request.setKey(getCarsKey);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.ACCEPT, MediaType.TEXT_HTML_VALUE);
-        HttpEntity<?> entity = new HttpEntity<>(headers);
-        String body = restTemplate.exchange(request.getUri(), GET, entity, String.class, new HashMap<>()).getBody();
-        body = body != null ? StringUtils.replace(body, "'", "\"") : null;
+        String body = getBodyFromRequest(request);
         if (body != null) {
-            body = deleteAttributes(body);
+            String startWord = ", \"attributes\"";
+            String endWord = "\"passenger\"";
+            body = deleteAttributes(body, startWord, endWord);
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(body, new TypeReference<>() {
-            });
+            try {
+                return mapper.readValue(body, new TypeReference<>() {
+                });
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
         }
         return Collections.emptyList();
     }
 
+    @Override
+    public List<CarPart> carPartsList(String typeid, String kid) {
+        CarPartsListRequest request = new CarPartsListRequest();
+        request.setKid(kid);
+        request.setTypeid(typeid);
+        request.setKey(carPartsListKey);
+        String body = getBodyFromRequest(request);
+        List<CarPartFromJson> carPartFromJsons;
+        try {
+            carPartFromJsons = objectMapper.readValue(body, new TypeReference<>() {
+            });
+            return getCarParts(carPartFromJsons, request.getDel());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getBodyFromRequest(Request request){
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.ACCEPT, MediaType.TEXT_HTML_VALUE);
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+        String body = restTemplate.exchange(request.getUri(), GET, entity, String.class, new HashMap<>()).getBody();
+        return body != null ? StringUtils.replace(body, "'", "\"") : null;
+    }
 }

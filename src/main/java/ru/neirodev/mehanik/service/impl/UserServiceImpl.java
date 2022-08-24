@@ -1,13 +1,16 @@
 package ru.neirodev.mehanik.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.neirodev.mehanik.dto.SetFieldRequest;
 import ru.neirodev.mehanik.dto.UserDTO;
 import ru.neirodev.mehanik.entity.User;
+import ru.neirodev.mehanik.entity.UserRating;
 import ru.neirodev.mehanik.mapper.UserMapper;
 import ru.neirodev.mehanik.repository.RoleRepository;
+import ru.neirodev.mehanik.repository.UserRatingRepository;
 import ru.neirodev.mehanik.repository.UserRepository;
 import ru.neirodev.mehanik.service.UserService;
 
@@ -20,18 +23,22 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
+    private final UserRatingRepository userRatingRepository;
     private final RoleRepository roleRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserRatingRepository userRatingRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
+        this.userRatingRepository = userRatingRepository;
         this.roleRepository = roleRepository;
     }
 
     @Transactional(readOnly = true)
     @Override
     public Optional<User> getById(Long id) {
-        return userRepository.findById(id);
+        Optional<User> repUser = userRepository.findById(id);
+        repUser.ifPresent(user -> user.setRating(getRatingById(id)));
+        return repUser;
     }
 
     @Transactional
@@ -78,5 +85,33 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> getByPhone(String phone) {
         return userRepository.findByPhone(phone);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public double getRatingById(Long id) {
+        Long count = userRatingRepository.countByUserToId(id);
+        if(count > 0) {
+            return userRatingRepository.sumByUserToId(id) / count;
+        }
+        return 0;
+    }
+
+    @Transactional
+    @Override
+    public void addRatingRow(Long id, Double value) {
+        UserRating userRating = new UserRating();
+        userRating.setUserToId(id);
+        userRating.setValue(value);
+        Long userFromId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        userRating.setUserFromId(userFromId);
+        userRatingRepository.save(userRating);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<UserRating> getRatingRowByUserToId(Long userToId) {
+        Long userFromId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userRatingRepository.findUserRatingByUserFromIdAndUserToId(userFromId, userToId);
     }
 }

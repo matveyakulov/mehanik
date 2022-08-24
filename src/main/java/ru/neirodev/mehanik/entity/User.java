@@ -35,7 +35,7 @@ public class User extends BaseEntity {
     @Column(name = "is_company")
     private Boolean isCompany;
 
-    @Schema(description = "Идентфикатор фотографии, сохраненной в репозитории")
+    @Schema(description = "Идентификатор фотографии, сохраненной в репозитории")
     private String photo;
 
     @JsonIgnore

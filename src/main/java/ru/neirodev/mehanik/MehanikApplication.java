@@ -9,8 +9,8 @@ import org.springframework.cache.annotation.EnableCaching;
 @SpringBootApplication
 public class MehanikApplication extends SpringBootServletInitializer {
 
-	public static void main(String[] args) {
-		SpringApplication.run(MehanikApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(MehanikApplication.class, args);
+    }
 
 }

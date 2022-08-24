@@ -9,6 +9,7 @@ import ru.neirodev.mehanik.entity.User;
 import ru.neirodev.mehanik.entity.UserRating;
 import ru.neirodev.mehanik.mapper.UserMapper;
 import ru.neirodev.mehanik.repository.UserRatingRepository;
+import ru.neirodev.mehanik.repository.RoleRepository;
 import ru.neirodev.mehanik.repository.UserRepository;
 import ru.neirodev.mehanik.service.UserService;
 
@@ -22,11 +23,13 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     private final UserRatingRepository userRatingRepository;
+    private final RoleRepository roleRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserRatingRepository userRatingRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserRatingRepository userRatingRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.userRatingRepository = userRatingRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Transactional(readOnly = true)
@@ -71,6 +74,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public void update(UserDTO userDTO, User user) {
         UserMapper.INSTANCE.updateUserFromDTO(userDTO, user);
+        user.setRole(roleRepository.getRoleByName("USER"));
+        userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<User> getByPhone(String phone) {
+        return userRepository.findByPhone(phone);
     }
 
     @Transactional(readOnly = true)

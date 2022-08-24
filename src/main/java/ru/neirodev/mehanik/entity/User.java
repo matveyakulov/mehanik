@@ -1,11 +1,11 @@
 package ru.neirodev.mehanik.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import ru.neirodev.mehanik.entity.security.Role;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Schema(description = "Пользователь")
 @Entity
@@ -37,4 +37,11 @@ public class User extends BaseEntity {
 
     @Schema(description = "Идентфикатор фотографии, сохраненной в репозитории")
     private String photo;
+
+    @JsonIgnore
+    private String smscode;
+
+    @ManyToOne
+    @JoinColumn(name = "roleId")
+    private Role role;
 }

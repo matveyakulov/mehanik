@@ -19,6 +19,8 @@ public interface UserService {
 
     void update(UserDTO userDTO, User user);
 
+    Optional<User> getByPhone(String phone);
+
     double getRatingById(Long id);
 
     void addRatingRow(Long id, Double value);

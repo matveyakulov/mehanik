@@ -20,7 +20,7 @@ import java.util.Optional;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
-@RequestMapping("${v1Prefix}/users")
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -95,6 +95,22 @@ public class UserController {
             return ResponseEntity.ok().body(repUser.get());
         }
         return new ResponseEntity<>("Пользователь с таким id не найден", NOT_FOUND);
+    }
+
+    @Operation(summary = "Получение пользователя по номер телефона")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
+            description = "Пользователь",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)))
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким номером телефона не найден")
+    @GetMapping
+    public ResponseEntity<?> getByPhone(
+            @Parameter(description = "Номер телефона пользователя", required = true)
+            @RequestParam String phone) {
+        Optional<User> repUser = userService.getByPhone(phone);
+        if (repUser.isPresent()) {
+            return ResponseEntity.ok().body(repUser.get());
+        }
+        return new ResponseEntity<>("Пользователь с таким номером телефона не найден", NOT_FOUND);
     }
 
     @Operation(summary = "Получение пользователя по id")

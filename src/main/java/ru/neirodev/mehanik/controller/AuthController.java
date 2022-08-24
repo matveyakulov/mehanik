@@ -1,6 +1,7 @@
 package ru.neirodev.mehanik.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,13 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.neirodev.mehanik.dto.SmsDTO;
+import ru.neirodev.mehanik.entity.User;
 import ru.neirodev.mehanik.entity.security.Session;
 import ru.neirodev.mehanik.security.JwtFilter;
 import ru.neirodev.mehanik.security.JwtTokenUtil;
 import ru.neirodev.mehanik.service.AuthService;
+import ru.neirodev.mehanik.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -25,34 +30,59 @@ public class AuthController {
 
     private final AuthService authService;
 
+    private final UserService userService;
+
     @Autowired
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, UserService userService) {
         this.authService = authService;
+        this.userService = userService;
     }
 
-    @Operation(summary = "Авторизация пользователя", operationId = "auth", description = "Метод для получения нового access token'а.\n\n"
-            + "Для ресурсов требующих авторизации, access token должен передаваться в заголовке "
-            + HttpHeaders.AUTHORIZATION + " со схемой установления подлинности Bearer, " + "либо в заголовке "
-            + HttpHeaders.COOKIE + " с именем " + JwtFilter.COOKIE_NAME + ". "
-            + "Если в оба этих заголовка установлены значения, то " + HttpHeaders.AUTHORIZATION
-            + " имеет приоритет.\n\n"
-            + "**ВАЖНО:** в Swagger UI кука с токеном не отображается, так как у неё установлен флаг HttpOnly, но тем не менее она корректно запоминается браузером и участвует в последующих запросах.")
+    @Operation(summary = "Отправка смс пользователю", description = "Метод для отправки смс пользователю")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK, description = "Смс успешно отправлена")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Неверные данные")
+    @PostMapping("/register")
+    public ResponseEntity<?> register(
+            @Parameter(name = "Номер телефона")
+            @RequestParam final String phone,
+            @Parameter(name = "Секретный ключ")
+            @RequestParam final String secret) {
+        if (authService.sendSms(new SmsDTO(phone, secret))) {
+            return ResponseEntity.ok().build();
+        } else {
+            return new ResponseEntity<>("Неверные данные", NOT_FOUND);
+        }
+    }
+
+    @Operation(summary = "Подтверждение кода из смс", description = "Метод для получения подтверждения кода из смс")
     @ApiResponse(responseCode = ""
             + HttpServletResponse.SC_OK, description = "В случае успешного выполнения запроса, сервер вернёт ответ с кодом "
             + HttpServletResponse.SC_OK + ", cookie с именем " + JwtFilter.COOKIE_NAME
             + " в заголовке и сессию пользователя в теле ответа. Access токен имеет срок годности(в минутах) "
             + JwtTokenUtil.ACCESS_TOKEN_VALIDITY_MINUTES
-            + " минут. Refresh токен имеет неограниченный срок действия.", content = @Content(mediaType = "application/json"), headers = @Header(name = HttpHeaders.SET_COOKIE, description = JwtFilter.COOKIE_NAME
-            + ": access token пользователя", schema = @Schema(type = "string")))
-    @ApiResponse(responseCode = "" + HttpServletResponse.SC_FORBIDDEN, description = "Регистрация не подтверждена")
+            + " минут. Refresh токен имеет неограниченный срок действия.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Session.class)),
+            headers = @Header(name = HttpHeaders.SET_COOKIE, description = JwtFilter.COOKIE_NAME
+                    + ": access token пользователя", schema = @Schema(type = "string")))
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_BAD_REQUEST, description = "Неверный код")
     @ApiResponse(responseCode = ""
-            + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с такими учетными данными не найден")
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam final String login, @RequestParam final String password) {
-        if ((login != null) && !login.isEmpty() && (password != null) && !password.isEmpty())
-            return ResponseEntity.ok().body(authService.login(login, password));
-        else
-            return new ResponseEntity<>("Неверные данные", NOT_FOUND);
+            + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким номером не существует")
+    @PostMapping("/confirm")
+    public ResponseEntity<?> confirm(
+            @Parameter(name = "Номер телефона")
+            @RequestParam final String phone,
+            @Parameter(name = "Код подтверждения")
+            @RequestParam final String code,
+            final HttpServletRequest request, final HttpServletResponse response) {
+        Optional<User> user = userService.getByPhone(phone);
+        if (user.isPresent()) {
+            if (user.get().getSmscode().equals(code)) {
+                return ResponseEntity.ok().body(authService.startSession(user.get(), request, response));
+            } else {
+                return ResponseEntity.badRequest().body("Неверный код");
+            }
+        }
+        return new ResponseEntity<>("Пользователь с таким номером не существует", NOT_FOUND);
     }
 
     @Operation(summary = "Обновление access token", operationId = "refresh", description = "Метод получения нового access token для указанного refresh token")
@@ -63,22 +93,23 @@ public class AuthController {
     @ApiResponse(responseCode = ""
             + HttpServletResponse.SC_NOT_FOUND, description = "Сессия с данным refresh token'ом не найдена")
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestParam final String refreshToken, final HttpServletRequest request,
-                                          final HttpServletResponse response) {
+    public ResponseEntity<?> refreshToken(
+            @Parameter(name = "Access токен")
+            @RequestParam final String refreshToken,
+            final HttpServletRequest request,
+            final HttpServletResponse response) {
         try {
-            if ((refreshToken != null) && !refreshToken.isEmpty()) {
-                Session session = authService.refreshToken(refreshToken, request, response);
-                if (session != null) {
-                    return ResponseEntity.ok().build();
-                } else {
-                    return new ResponseEntity<>("Сессия с данным refresh token'ом не найдена", NOT_FOUND);
-                }
+            Session session = authService.refreshToken(refreshToken, request, response);
+            if (session != null) {
+                return ResponseEntity.ok().build();
             } else {
-                return ResponseEntity.badRequest().body("Неверный токен");
+                return new ResponseEntity<>("Сессия с данным refresh token'ом не найдена", NOT_FOUND);
             }
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             return ResponseEntity.internalServerError().body("Создание завершилось с ошибкой: " + e.getMessage());
         }
+
     }
 
     @Operation(summary = "Закрытие пользовательской сессии",

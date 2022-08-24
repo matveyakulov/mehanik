@@ -5,7 +5,8 @@ CREATE SEQUENCE IF NOT EXISTS users.roles_id_seq start 1;
 CREATE TABLE IF NOT EXISTS users.roles
 (
     id   bigint                                              NOT NULL DEFAULT nextval('users.roles_id_seq'::regclass),
-    name character varying(450) COLLATE pg_catalog."default" NOT NULL
+    name character varying(450) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT roles_pk PRIMARY KEY (id)
 );
 
 COMMENT ON TABLE users.roles IS 'Роли';
@@ -26,7 +27,8 @@ CREATE TABLE IF NOT EXISTS users.sessions
     refresh_token character varying                                                              NOT NULL,
     last_login    timestamp without time zone,
     useragent     character varying,
-    userIp        character varying
+    userIp        character varying,
+    CONSTRAINT sessions_pk PRIMARY KEY (id)
 );
 
 COMMENT ON TABLE users.sessions IS 'Сессии пользователей';
@@ -43,4 +45,4 @@ COMMENT ON COLUMN users.sessions.useragent IS 'Строка useragent из за�
 COMMENT ON COLUMN users.sessions.userip IS 'IP адрес, с которого был произведён вход';
 
 ALTER TABLE core.users ADD COLUMN role_id BIGINT REFERENCES users.roles(id);
-ALTER TABLE core.users ADD COLUMN smsCode int;
+ALTER TABLE core.users ADD COLUMN smsCode varchar;

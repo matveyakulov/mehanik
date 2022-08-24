@@ -5,19 +5,24 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.WebUtils;
-import org.webjars.NotFoundException;
+import ru.neirodev.mehanik.dto.SmsDTO;
 import ru.neirodev.mehanik.entity.User;
 import ru.neirodev.mehanik.entity.security.Session;
 import ru.neirodev.mehanik.repository.SessionRepository;
 import ru.neirodev.mehanik.repository.UserRepository;
 import ru.neirodev.mehanik.security.JwtTokenUtil;
 import ru.neirodev.mehanik.service.AuthService;
+import ru.neirodev.mehanik.sms.SmsService;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Optional;
+import java.util.Scanner;
 import java.util.UUID;
 
 import static ru.neirodev.mehanik.security.JwtFilter.COOKIE_NAME;
@@ -31,26 +36,22 @@ public class AuthServiceImpl implements AuthService {
 
     private final JwtTokenUtil jwtTokenUtil;
 
+    private final SmsService smsService;
+
     @Autowired
-    public AuthServiceImpl(SessionRepository sessionRepository, UserRepository userRepository, JwtTokenUtil jwtTokenUtil) {
+    public AuthServiceImpl(SessionRepository sessionRepository, UserRepository userRepository, JwtTokenUtil jwtTokenUtil, SmsService smsService) {
         this.sessionRepository = sessionRepository;
         this.userRepository = userRepository;
         this.jwtTokenUtil = jwtTokenUtil;
+        this.smsService = smsService;
     }
 
     @Transactional
     @Override
-    public Session login(String login, String password, HttpServletRequest request, HttpServletResponse response) {
-        Long uid = userRepository.login(login, password);
-        Optional<User> user = null;
-        if (uid != null)
-            user = userRepository.findById(uid);
-        if ((user == null) || user.isEmpty())
-            throw new NotFoundException("Пользователь не найден");
-
+    public Session startSession(User user, HttpServletRequest request, HttpServletResponse response) {
         Session session = new Session();
-        session.setUserId(uid);
-        refreshSession(session, user.get(), request, response);
+        session.setUserId(user.getId());
+        refreshSession(session, user, request, response);
         return session;
     }
 
@@ -107,4 +108,38 @@ public class AuthServiceImpl implements AuthService {
         response.addCookie(cookie);
     }
 
+    @Transactional
+    @Override
+    public boolean sendSms(SmsDTO smsDTO) {
+
+//        RestTemplate restTemplate = new RestTemplate();
+//        HttpHeaders httpHeaders = new HttpHeaders();
+//        httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+//        String params = String.format("phone=%s&secret=%s&message=%s", smsDTO.getPhone(), smsDTO.getSecret(),
+//                "Код подтверждения: " + smsDTO.getCode());
+//        HttpEntity<?> httpEntity = new HttpEntity<>(params, httpHeaders);
+//        restTemplate.postForObject("https://carwash.neirodev.ru/sms", httpEntity, String.class);
+        try (Scanner scanner = new Scanner(
+                new URL("https://carwash.neirodev.ru/sms" + "?secret="
+                        + URLEncoder.encode(smsDTO.getSecret(), StandardCharsets.UTF_8) + "&phone="
+                        + URLEncoder.encode(smsDTO.getPhone(), StandardCharsets.UTF_8) + "&message="
+                        + URLEncoder.encode("Код подтверждения: " + smsDTO.getCode(), StandardCharsets.UTF_8)).openStream(),
+                StandardCharsets.UTF_8)) {
+            scanner.useDelimiter("\\A").hasNext();
+        } catch (Exception e) {
+            return false;
+        }
+        Optional<User> repUser = userRepository.findByPhone(smsDTO.getPhone());
+        User user;
+        if(repUser.isPresent()){
+            user = repUser.get();
+            user.setSmscode(smsDTO.getCode());
+        } else {
+            user = new User();
+            user.setPhone(smsDTO.getPhone());
+            user.setSmscode(smsDTO.getCode());
+        }
+        userRepository.save(user);
+        return true;
+    }
 }

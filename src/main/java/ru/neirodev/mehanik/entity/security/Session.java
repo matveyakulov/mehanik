@@ -48,6 +48,7 @@ public class Session extends BaseEntity {
     private String refreshToken;
     private Date lastLogin;
     private String useragent;
+    @Column(name = "userip")
     private String userIp;
 
 }

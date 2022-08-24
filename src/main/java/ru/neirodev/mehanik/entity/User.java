@@ -1,5 +1,6 @@
 package ru.neirodev.mehanik.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import ru.neirodev.mehanik.entity.security.Role;
@@ -30,16 +31,15 @@ public class User extends BaseEntity {
     @Schema(description = "Рейтинг", accessMode = Schema.AccessMode.READ_ONLY)
     private Double rating = 0.0;
 
-    @Schema(description = "Количество оценок", accessMode = Schema.AccessMode.READ_ONLY)
-    @Column(name = "count_rating")
-    private Long countRating = 0L;
-
     @Schema(description = "true - компания, false - частное лицо")
     @Column(name = "is_company")
     private Boolean isCompany;
 
     @Schema(description = "Идентфикатор фотографии, сохраненной в репозитории")
     private String photo;
+
+    @JsonIgnore
+    private String smscode;
 
     @ManyToOne
     @JoinColumn(name = "roleId")

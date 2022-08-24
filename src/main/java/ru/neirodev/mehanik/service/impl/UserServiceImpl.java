@@ -7,6 +7,7 @@ import ru.neirodev.mehanik.dto.SetFieldRequest;
 import ru.neirodev.mehanik.dto.UserDTO;
 import ru.neirodev.mehanik.entity.User;
 import ru.neirodev.mehanik.mapper.UserMapper;
+import ru.neirodev.mehanik.repository.RoleRepository;
 import ru.neirodev.mehanik.repository.UserRepository;
 import ru.neirodev.mehanik.service.UserService;
 
@@ -19,10 +20,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
+    private final RoleRepository roleRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Transactional(readOnly = true)
@@ -67,5 +70,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public void update(UserDTO userDTO, User user) {
         UserMapper.INSTANCE.updateUserFromDTO(userDTO, user);
+        user.setRole(roleRepository.getRoleByName("USER"));
+        userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<User> getByPhone(String phone) {
+        return userRepository.findByPhone(phone);
     }
 }

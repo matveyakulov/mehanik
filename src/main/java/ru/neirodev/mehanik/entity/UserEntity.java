@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Entity
 @Table(schema = "core", name = "users")
 @Data
-public class User extends BaseEntity {
+public class UserEntity extends BaseEntity {
 
     @Schema(description = "Название компании или имя + фамилия человека")
     private String name;
@@ -28,7 +28,7 @@ public class User extends BaseEntity {
     @Schema(description = "Почта")
     private String email;
 
-    @Schema(description = "Рейтинг", accessMode = Schema.AccessMode.READ_ONLY)
+    @Schema(description = "Рейтинг", accessMode = Schema.AccessMode.READ_ONLY, defaultValue = "0.0")
     private Double rating = 0.0;
 
     @Schema(description = "true - компания, false - частное лицо")
@@ -42,6 +42,6 @@ public class User extends BaseEntity {
     private String smscode;
 
     @ManyToOne
-    @JoinColumn(name = "roleId")
+    @JoinColumn(name = "role_id")
     private Role role;
 }

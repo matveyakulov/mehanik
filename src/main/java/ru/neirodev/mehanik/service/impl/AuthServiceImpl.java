@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.WebUtils;
 import ru.neirodev.mehanik.dto.SmsDTO;
-import ru.neirodev.mehanik.entity.User;
+import ru.neirodev.mehanik.entity.UserEntity;
 import ru.neirodev.mehanik.entity.security.Session;
 import ru.neirodev.mehanik.repository.SessionRepository;
 import ru.neirodev.mehanik.repository.UserRepository;
@@ -48,16 +48,16 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     @Override
-    public Session startSession(User user, HttpServletRequest request, HttpServletResponse response) {
+    public Session startSession(UserEntity userEntity, HttpServletRequest request, HttpServletResponse response) {
         Session session = new Session();
-        session.setUserId(user.getId());
-        refreshSession(session, user, request, response);
+        session.setUserId(userEntity.getId());
+        refreshSession(session, userEntity, request, response);
         return session;
     }
 
-    private void refreshSession(Session session, User user, HttpServletRequest request, HttpServletResponse response) {
-        session.setAccessToken(jwtTokenUtil.generateToken(user.getId(), user.getPhone(),
-                request.getRequestURL().toString(), user.getRole().getName()));
+    private void refreshSession(Session session, UserEntity userEntity, HttpServletRequest request, HttpServletResponse response) {
+        session.setAccessToken(jwtTokenUtil.generateToken(userEntity.getId(), userEntity.getPhone(),
+                request.getRequestURL().toString(), userEntity.getRole().getName()));
         session.setRefreshToken(UUID.randomUUID().toString());
         session.setUseragent(request.getHeader(HttpHeaders.USER_AGENT));
         String remoteAddr = request.getHeader("X-Forwarded-For");
@@ -129,17 +129,17 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             return false;
         }
-        Optional<User> repUser = userRepository.findByPhone(smsDTO.getPhone());
-        User user;
+        Optional<UserEntity> repUser = userRepository.findByPhone(smsDTO.getPhone());
+        UserEntity userEntity;
         if(repUser.isPresent()){
-            user = repUser.get();
-            user.setSmscode(smsDTO.getCode());
+            userEntity = repUser.get();
+            userEntity.setSmscode(smsDTO.getCode());
         } else {
-            user = new User();
-            user.setPhone(smsDTO.getPhone());
-            user.setSmscode(smsDTO.getCode());
+            userEntity = new UserEntity();
+            userEntity.setPhone(smsDTO.getPhone());
+            userEntity.setSmscode(smsDTO.getCode());
         }
-        userRepository.save(user);
+        userRepository.save(userEntity);
         return true;
     }
 }

@@ -11,7 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.neirodev.mehanik.dto.SmsDTO;
-import ru.neirodev.mehanik.entity.User;
+import ru.neirodev.mehanik.entity.UserEntity;
 import ru.neirodev.mehanik.entity.security.Session;
 import ru.neirodev.mehanik.security.JwtFilter;
 import ru.neirodev.mehanik.security.JwtTokenUtil;
@@ -74,7 +74,7 @@ public class AuthController {
             @Parameter(name = "Код подтверждения")
             @RequestParam final String code,
             final HttpServletRequest request, final HttpServletResponse response) {
-        Optional<User> user = userService.getByPhone(phone);
+        Optional<UserEntity> user = userService.getByPhone(phone);
         if (user.isPresent()) {
             if (user.get().getSmscode().equals(code)) {
                 return ResponseEntity.ok().body(authService.startSession(user.get(), request, response));

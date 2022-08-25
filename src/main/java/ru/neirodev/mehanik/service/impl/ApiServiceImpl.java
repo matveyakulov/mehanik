@@ -149,11 +149,13 @@ public class ApiServiceImpl implements ApiService {
         return Collections.emptyList();
     }
 
-    private String getBodyFromRequest(Request request){
+    private String getBodyFromRequest(Request request) {
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.ACCEPT, MediaType.TEXT_HTML_VALUE);
         HttpEntity<?> entity = new HttpEntity<>(headers);
-        String body = restTemplate.exchange(request.getUri(), GET, entity, String.class, new HashMap<>()).getBody();
+        String body = null;
+        body = restTemplate.exchange(request.getUri(), GET, entity, String.class, new HashMap<>()).getBody();
+
         return body != null ? StringUtils.replace(body, "'", "\"") : null;
     }
 }

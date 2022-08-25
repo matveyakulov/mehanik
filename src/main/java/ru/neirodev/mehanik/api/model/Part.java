@@ -1,11 +1,13 @@
 package ru.neirodev.mehanik.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Schema(description = "Запчасть")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -13,7 +15,9 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Part {
 
-    private String name;
+    @Schema(description = "Фирма")
+    private String brand;
 
-    private String value;
+    @Schema(description = "Код")
+    private String code;
 }

@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.neirodev.mehanik.dto.SetFieldRequest;
 import ru.neirodev.mehanik.dto.UserDTO;
-import ru.neirodev.mehanik.entity.User;
-import ru.neirodev.mehanik.entity.UserRating;
+import ru.neirodev.mehanik.entity.UserEntity;
+import ru.neirodev.mehanik.entity.UserRatingEntity;
 import ru.neirodev.mehanik.mapper.UserMapper;
 import ru.neirodev.mehanik.repository.RoleRepository;
 import ru.neirodev.mehanik.repository.UserRatingRepository;
@@ -35,36 +35,36 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<User> getById(Long id) {
-        Optional<User> repUser = userRepository.findById(id);
+    public Optional<UserEntity> getById(Long id) {
+        Optional<UserEntity> repUser = userRepository.findById(id);
         repUser.ifPresent(user -> user.setRating(getRatingById(id)));
         return repUser;
     }
 
     @Transactional
     @Override
-    public User save(UserDTO userDTO) {
-        User user = new User();
-        UserMapper.INSTANCE.updateUserFromDTO(userDTO, user);
-        return userRepository.save(user);
+    public UserEntity save(UserDTO userDTO) {
+        UserEntity userEntity = new UserEntity();
+        UserMapper.INSTANCE.updateUserFromDTO(userDTO, userEntity);
+        return userRepository.save(userEntity);
     }
 
     @Transactional
     @Override
-    public void delete(User user) {
-        userRepository.delete(user);
+    public void delete(UserEntity userEntity) {
+        userRepository.delete(userEntity);
     }
 
     @Transactional
     @Override
     public void setField(SetFieldRequest request) {
-        Optional<User> repUser = userRepository.findById(request.getId());
+        Optional<UserEntity> repUser = userRepository.findById(request.getId());
         if (repUser.isPresent()) {
-            User user = repUser.get();
+            UserEntity userEntity = repUser.get();
             try {
-                Field field = User.class.getDeclaredField(request.getFieldName());
+                Field field = UserEntity.class.getDeclaredField(request.getFieldName());
                 field.setAccessible(true);
-                field.set(user, request.getFieldValue());
+                field.set(userEntity, request.getFieldValue());
             } catch (NoSuchFieldException e) {
                 throw new RuntimeException("Поле не существует", e);
             } catch (IllegalAccessException e) {
@@ -75,15 +75,15 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void update(UserDTO userDTO, User user) {
-        UserMapper.INSTANCE.updateUserFromDTO(userDTO, user);
-        user.setRole(roleRepository.getRoleByName("USER"));
-        userRepository.save(user);
+    public void update(UserDTO userDTO, UserEntity userEntity) {
+        UserMapper.INSTANCE.updateUserFromDTO(userDTO, userEntity);
+        userEntity.setRole(roleRepository.getRoleByName("USER"));
+        userRepository.save(userEntity);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<User> getByPhone(String phone) {
+    public Optional<UserEntity> getByPhone(String phone) {
         return userRepository.findByPhone(phone);
     }
 
@@ -100,17 +100,15 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void addRatingRow(Long id, Double value) {
-        UserRating userRating = new UserRating();
-        userRating.setUserToId(id);
-        userRating.setValue(value);
-        Long userFromId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        userRating.setUserFromId(userFromId);
-        userRatingRepository.save(userRating);
+        UserRatingEntity userRatingEntity = new UserRatingEntity();
+        userRatingEntity.setUserToId(id);
+        userRatingEntity.setValue(value);
+        userRatingRepository.save(userRatingEntity);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<UserRating> getRatingRowByUserToId(Long userToId) {
+    public Optional<UserRatingEntity> getRatingRowByUserToId(Long userToId) {
         Long userFromId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userRatingRepository.findUserRatingByUserFromIdAndUserToId(userFromId, userToId);
     }

@@ -43,6 +43,9 @@ public class ApiServiceImpl implements ApiService {
     @Value("${partsapi.carPartsList.key}")
     private String carPartsListKey;
 
+    @Value("${partsapi.vinDecodeShort.key}")
+    private String vinDecodeKey;
+
     @PostConstruct
     public void init() {
         restTemplate = new RestTemplate();
@@ -80,11 +83,10 @@ public class ApiServiceImpl implements ApiService {
                 return new ObjectMapper().readValue(body, new TypeReference<>() {
                 });
             } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                return Collections.emptyList();
             }
         }
         return Collections.emptyList();
-
     }
 
     @Cacheable(value = "cars", key = "#model")
@@ -105,12 +107,13 @@ public class ApiServiceImpl implements ApiService {
                 return mapper.readValue(body, new TypeReference<>() {
                 });
             } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                return Collections.emptyList();
             }
         }
         return Collections.emptyList();
     }
 
+    @Cacheable(value = "carParts", key = "#kid")
     @Override
     public List<CarPart> carPartsList(String typeid, String kid) {
         CarPartsListRequest request = new CarPartsListRequest();
@@ -124,8 +127,26 @@ public class ApiServiceImpl implements ApiService {
             });
             return getCarParts(carPartFromJsons, request.getDel());
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return Collections.emptyList();
         }
+    }
+
+    @Cacheable(value = "vins", key = "#vin")
+    @Override
+    public List<VinDecode> vinDecodeShort(String vin) {
+        VinDecodeShortRequest request = new VinDecodeShortRequest();
+        request.setVin(vin);
+        request.setKey(vinDecodeKey);
+        String body = getBodyFromRequest(request);
+        if (body != null) {
+            try {
+                return objectMapper.readValue(body, new TypeReference<>() {
+                });
+            } catch (JsonProcessingException e) {
+                return Collections.emptyList();
+            }
+        }
+        return Collections.emptyList();
     }
 
     private String getBodyFromRequest(Request request) {

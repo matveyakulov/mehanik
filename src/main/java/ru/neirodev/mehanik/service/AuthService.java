@@ -1,7 +1,7 @@
 package ru.neirodev.mehanik.service;
 
 import ru.neirodev.mehanik.dto.SmsDTO;
-import ru.neirodev.mehanik.entity.User;
+import ru.neirodev.mehanik.entity.UserEntity;
 import ru.neirodev.mehanik.entity.security.Session;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,5 +15,5 @@ public interface AuthService {
 
     boolean sendSms(SmsDTO smsDTO);
 
-    Session startSession(User user, HttpServletRequest request, HttpServletResponse response);
+    Session startSession(UserEntity userEntity, HttpServletRequest request, HttpServletResponse response);
 }

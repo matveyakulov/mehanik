@@ -31,8 +31,8 @@ public class RestUtils {
             for (String part : parts) {
                 int index = part.indexOf(del);
                 Part partObj = new Part();
-                partObj.setName(part.substring(0, index));
-                partObj.setValue(part.substring(index + del.length()));
+                partObj.setBrand(part.substring(0, index));
+                partObj.setCode(part.substring(index + del.length()));
                 carPart.getParts().add(partObj);
             }
             carParts.add(carPart);

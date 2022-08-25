@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS core.users_rating
 );
 
 ALTER TABLE core.users
-    DROP COLUMN count_rating;
+    DROP COLUMN IF EXISTS count_rating;

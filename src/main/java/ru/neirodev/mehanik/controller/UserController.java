@@ -10,8 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.neirodev.mehanik.dto.SetFieldRequest;
 import ru.neirodev.mehanik.dto.UserDTO;
-import ru.neirodev.mehanik.entity.User;
-import ru.neirodev.mehanik.entity.UserRating;
+import ru.neirodev.mehanik.entity.UserEntity;
+import ru.neirodev.mehanik.entity.UserRatingEntity;
 import ru.neirodev.mehanik.service.UserService;
 
 import javax.persistence.EntityNotFoundException;
@@ -33,7 +33,7 @@ public class UserController {
 
     @Operation(summary = "Создание пользователя")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)))
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class)))
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @PostMapping("")
     public ResponseEntity<?> create(@RequestBody final UserDTO userDTO) {
@@ -52,10 +52,10 @@ public class UserController {
     public ResponseEntity<?> update(
             @RequestBody final UserDTO userDTO) {
         try {
-            Optional<User> repUser = userService.getById(userDTO.getId());
+            Optional<UserEntity> repUser = userService.getById(userDTO.getId());
             if (repUser.isPresent()) {
-                User user = repUser.get();
-                userService.update(userDTO, user);
+                UserEntity userEntity = repUser.get();
+                userService.update(userDTO, userEntity);
                 return ResponseEntity.accepted().build();
             }
             return new ResponseEntity<>("Пользователь с таким id не найден", NOT_FOUND);
@@ -83,13 +83,13 @@ public class UserController {
 
     @Operation(summary = "Получение пользователя по id")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)))
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class)))
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким id не найден")
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(
             @Parameter(description = "Идентификатор пользователя", required = true)
             @PathVariable final Long id) {
-        Optional<User> repUser = userService.getById(id);
+        Optional<UserEntity> repUser = userService.getById(id);
         if (repUser.isPresent()) {
             return ResponseEntity.ok().body(repUser.get());
         }
@@ -99,13 +99,13 @@ public class UserController {
     @Operation(summary = "Получение пользователя по номер телефона")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
             description = "Пользователь",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)))
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class)))
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким номером телефона не найден")
     @GetMapping
     public ResponseEntity<?> getByPhone(
             @Parameter(description = "Номер телефона пользователя", required = true)
             @RequestParam String phone) {
-        Optional<User> repUser = userService.getByPhone(phone);
+        Optional<UserEntity> repUser = userService.getByPhone(phone);
         if (repUser.isPresent()) {
             return ResponseEntity.ok().body(repUser.get());
         }
@@ -119,7 +119,7 @@ public class UserController {
     public ResponseEntity<?> deleteById(
             @Parameter(description = "Идентификатор пользователя", required = true)
             @PathVariable final Long id) {
-        Optional<User> repUser = userService.getById(id);
+        Optional<UserEntity> repUser = userService.getById(id);
         if (repUser.isPresent()) {
             userService.delete(repUser.get());
             return ResponseEntity.ok().build();
@@ -129,13 +129,13 @@ public class UserController {
 
     @Operation(summary = "Получение рейтинга пользователя по id")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)))
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class)))
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким id не найден")
     @GetMapping("/{id}/rating")
     public ResponseEntity<?> getRatingById(
             @Parameter(description = "Идентификатор пользователя", required = true)
             @PathVariable final Long id) {
-        Optional<User> repUser = userService.getById(id);
+        Optional<UserEntity> repUser = userService.getById(id);
         if (repUser.isPresent()) {
             return ResponseEntity.ok().body(userService.getRatingById(id));
         }
@@ -165,7 +165,7 @@ public class UserController {
     public ResponseEntity<?> getRatingRow(
             @Parameter(description = "Идентификатор пользователя, у которого проверяем поставлена оценка", required = true)
             @PathVariable final Long id) {
-        Optional<UserRating> repUserRating = userService.getRatingRowByUserToId(id);
+        Optional<UserRatingEntity> repUserRating = userService.getRatingRowByUserToId(id);
         if(repUserRating.isEmpty()){
             return ResponseEntity.ok().body(0);
         } else {

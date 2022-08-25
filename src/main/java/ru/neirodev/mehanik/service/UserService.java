@@ -2,28 +2,28 @@ package ru.neirodev.mehanik.service;
 
 import ru.neirodev.mehanik.dto.SetFieldRequest;
 import ru.neirodev.mehanik.dto.UserDTO;
-import ru.neirodev.mehanik.entity.User;
-import ru.neirodev.mehanik.entity.UserRating;
+import ru.neirodev.mehanik.entity.UserEntity;
+import ru.neirodev.mehanik.entity.UserRatingEntity;
 
 import java.util.Optional;
 
 public interface UserService {
 
-    Optional<User> getById(Long id);
+    Optional<UserEntity> getById(Long id);
 
-    User save(UserDTO userDTO);
+    UserEntity save(UserDTO userDTO);
 
-    void delete(User user);
+    void delete(UserEntity userEntity);
 
     void setField(SetFieldRequest request);
 
-    void update(UserDTO userDTO, User user);
+    void update(UserDTO userDTO, UserEntity userEntity);
 
-    Optional<User> getByPhone(String phone);
+    Optional<UserEntity> getByPhone(String phone);
 
     double getRatingById(Long id);
 
     void addRatingRow(Long id, Double value);
 
-    Optional<UserRating> getRatingRowByUserToId(Long userToId);
+    Optional<UserRatingEntity> getRatingRowByUserToId(Long userToId);
 }

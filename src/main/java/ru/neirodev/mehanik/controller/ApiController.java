@@ -16,8 +16,6 @@ import ru.neirodev.mehanik.enums.CarType;
 import ru.neirodev.mehanik.service.ApiService;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.Collections;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -91,23 +89,31 @@ public class ApiController {
 
     @Operation(summary = "Список запчастей к модели")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Car.class)))
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CarPart.class)))
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @GetMapping("/carParts")
-    public List<CarPart> carPartsList(
+    public ResponseEntity<?> carPartsList(
             @Parameter(description = "Тип транспортного средства")
             @RequestParam final CarType carType,
             @Parameter(description = "Модификация машины(carId из /modifications")
             @RequestParam final Long kid) {
         try {
-            return apiService.carPartsList(carType.getCode(), String.valueOf(kid));
+            return ResponseEntity.ok().body(apiService.carPartsList(carType.getCode(), String.valueOf(kid)));
         } catch (Exception ex) {
-            return Collections.emptyList();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
+    @Operation(summary = "Поиск по vin машину")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = VinDecode.class)))
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @GetMapping("/vinDecode")
-    public List<VinDecode> vinDecodeShort(@RequestParam final String vin){
-        return apiService.vinDecodeShort(vin);
+    public ResponseEntity<?> vinDecodeShort(@RequestParam final String vin) {
+        try {
+            return ResponseEntity.ok().body(apiService.vinDecodeShort(vin));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

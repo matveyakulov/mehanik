@@ -56,7 +56,7 @@ public class PartAnnouncementController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PartAnnouncementEntity.class)))
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким id не найден")
     @GetMapping("/{id}")
-    private ResponseEntity<?> getById(@PathVariable final Long id) {
+    public ResponseEntity<?> getById(@PathVariable final Long id) {
         Optional<PartAnnouncementEntity> partAnnouncement = partAnnouncementService.findById(id);
         if (partAnnouncement.isPresent()){
             return ResponseEntity.ok().body(partAnnouncement.get());
@@ -82,7 +82,7 @@ public class PartAnnouncementController {
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Объявление с таким id не найдено")
     @DeleteMapping("/{id}")
-    private ResponseEntity<?> deleteById(@PathVariable final Long id) {
+    public ResponseEntity<?> deleteById(@PathVariable final Long id) {
         Optional<PartAnnouncementEntity> partAnnouncement = partAnnouncementService.findById(id);
         if (partAnnouncement.isPresent()){
             partAnnouncementService.delete(partAnnouncement.get());

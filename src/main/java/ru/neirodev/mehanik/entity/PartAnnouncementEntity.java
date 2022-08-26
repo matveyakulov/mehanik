@@ -2,16 +2,18 @@ package ru.neirodev.mehanik.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.JoinColumn;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import java.util.Date;
 
 @Schema(description = "Объявление о продаже запчасти")
+@EntityListeners(AuditingEntityListener.class)
 @Entity
 @Table(schema = "core", name = "parts_announcement")
 @Data
@@ -54,7 +56,7 @@ public class PartAnnouncementEntity extends BaseEntity{
     private String photo;
 
     @Schema(description = "Дата размещения", accessMode = Schema.AccessMode.READ_ONLY)
-    @CreationTimestamp
+    @CreatedDate
     private Date dateCreate;
 
     @Schema(description = "true - разрешить писать на почту", defaultValue = "false")
@@ -70,11 +72,7 @@ public class PartAnnouncementEntity extends BaseEntity{
     private Boolean archive = false;
 
     @Schema(description = "Владелец объявления")
+    @CreatedBy
     @JoinColumn(name = "owner_id", updatable = false)
     private Long ownerId;
-
-    @PrePersist
-    private void save(){
-        ownerId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
 }

@@ -15,7 +15,7 @@ import java.util.Date;
 @Entity
 @Table(schema = "core", name = "parts_announcement")
 @Data
-public class PartAnnouncement extends BaseEntity{
+public class PartAnnouncementEntity extends BaseEntity{
 
     @Schema(description = "Тип ТС")
     private String type;

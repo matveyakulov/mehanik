@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS core.parts_announcement ADD COLUMN city varchar NOT NULL;

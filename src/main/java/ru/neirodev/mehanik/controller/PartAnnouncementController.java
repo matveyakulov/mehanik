@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import ru.neirodev.mehanik.dto.FilterDTO;
 import ru.neirodev.mehanik.dto.PartAnnouncementDTO;
 import ru.neirodev.mehanik.entity.PartAnnouncementEntity;
 import ru.neirodev.mehanik.service.PartAnnouncementService;
@@ -32,12 +33,20 @@ public class PartAnnouncementController {
         this.partAnnouncementService = partAnnouncementService;
     }
 
+    @Operation(summary = "Список объявлений о продаже с фильтрацией")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = PartAnnouncementDTO.class)))
+    @GetMapping
+    public List<PartAnnouncementDTO> getAllDTO(@RequestBody final FilterDTO filterDTO) {
+        return partAnnouncementService.getAllDTO(filterDTO);
+    }
+
     @PreAuthorize("hasAnyAuthority('USER')")
     @Operation(summary = "Список объявлений о продаже у текущего пользователя")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PartAnnouncementDTO.class)))
-    @GetMapping("/DTO")
-    public List<PartAnnouncementDTO> getAllDTO(
+    @GetMapping("/me")
+    public List<PartAnnouncementDTO> getAllCurrentDTO(
             @Parameter(description = "Номер страницы(с 0)")
             @RequestParam(required = false) final Integer pageNum,
             @Parameter(description = "Размер страницы(с 1)")
@@ -46,9 +55,9 @@ public class PartAnnouncementController {
             @RequestParam(required = false) final Boolean archive) {
         if (pageSize != null && pageSize > 0 && pageNum != null && pageNum > -1) {
             Pageable pageable = PageRequest.of(pageNum, pageSize);
-            return partAnnouncementService.getAllDTO(pageable, archive);
+            return partAnnouncementService.getAllCurrentDTO(pageable, archive);
         }
-        return partAnnouncementService.getAllDTO(archive);
+        return partAnnouncementService.getAllCurrentDTO(archive);
     }
 
     @Operation(summary = "Получение объявления по id")

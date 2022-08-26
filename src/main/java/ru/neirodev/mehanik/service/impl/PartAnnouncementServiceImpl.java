@@ -1,17 +1,22 @@
 package ru.neirodev.mehanik.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.neirodev.mehanik.dto.FilterDTO;
 import ru.neirodev.mehanik.dto.PartAnnouncementDTO;
 import ru.neirodev.mehanik.entity.PartAnnouncementEntity;
 import ru.neirodev.mehanik.repository.PartAnnouncementRepository;
 import ru.neirodev.mehanik.service.PartAnnouncementService;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PartAnnouncementServiceImpl implements PartAnnouncementService {
@@ -25,16 +30,16 @@ public class PartAnnouncementServiceImpl implements PartAnnouncementService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<PartAnnouncementDTO> getAllDTO(Boolean archive) {
+    public List<PartAnnouncementDTO> getAllCurrentDTO(Boolean archive) {
         Long id = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return partAnnouncementRepository.getAllDTO(archive, id);
+        return partAnnouncementRepository.getAllCurrentDTO(archive, id);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<PartAnnouncementDTO> getAllDTO(Pageable pageable, Boolean archive) {
+    public List<PartAnnouncementDTO> getAllCurrentDTO(Pageable pageable, Boolean archive) {
         Long id = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return partAnnouncementRepository.getAllDTO(pageable, archive, id);
+        return partAnnouncementRepository.getAllCurrentDTO(pageable, archive, id);
     }
 
     @Transactional(readOnly = true)
@@ -66,5 +71,23 @@ public class PartAnnouncementServiceImpl implements PartAnnouncementService {
         if (id.equals(partAnnouncementEntity.getOwnerId())) {
             partAnnouncementRepository.delete(partAnnouncementEntity);
         }
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<PartAnnouncementDTO> getAllDTO(FilterDTO filterDTO) {
+        Pageable pageable = PageRequest.of(filterDTO.getPageNum(), filterDTO.getPageSize(), Sort.Direction.ASC, "dateCreate");
+        List<PartAnnouncementDTO> dtos = partAnnouncementRepository.getAllDTO(filterDTO.getTypes(), filterDTO.getBrands(), filterDTO.getNameOfPart(),
+                filterDTO.getStartPrice(), filterDTO.getEndPrice(), filterDTO.getCondition(), filterDTO.getOriginal(),
+                filterDTO.getIsCompany(), pageable);
+        if(filterDTO.getCity() != null){
+            LinkedList<PartAnnouncementDTO> partAnnouncementDTOS = dtos.stream()
+                    .filter(dto -> dto.getCity().equals(filterDTO.getCity()))
+                    .collect(Collectors.toCollection(LinkedList::new));
+            dtos.removeAll(partAnnouncementDTOS);
+            partAnnouncementDTOS.addAll(dtos);
+            return partAnnouncementDTOS;
+        }
+        return dtos;
     }
 }

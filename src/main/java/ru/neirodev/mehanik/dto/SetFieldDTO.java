@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Schema(description = "Объект для изменения одного протого поля(примитивного) у любого обьекта")
 @Data
-public class SetFieldRequest {
+public class SetFieldDTO {
 
     @Schema(description = "Идентификатор изменяемого обьекта")
     private Long id;

@@ -49,11 +49,17 @@ public class PartAnnouncementEntity extends BaseEntity{
     @Schema(description = "Цена")
     private Integer price;
 
-    @Schema(description = "Адрес")
+    @Schema(description = "Полный адрес")
     private String address;
+
+    @Schema(description = "Название города")
+    private String city;
 
     @Schema(description = "Фото")
     private String photo;
+
+    @Schema(description = "true - компания, иначе частник")
+    private Boolean isCompany;
 
     @Schema(description = "Дата размещения", accessMode = Schema.AccessMode.READ_ONLY)
     @CreatedDate

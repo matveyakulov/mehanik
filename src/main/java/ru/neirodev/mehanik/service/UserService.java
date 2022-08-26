@@ -1,6 +1,6 @@
 package ru.neirodev.mehanik.service;
 
-import ru.neirodev.mehanik.dto.SetFieldRequest;
+import ru.neirodev.mehanik.dto.SetFieldDTO;
 import ru.neirodev.mehanik.dto.UserDTO;
 import ru.neirodev.mehanik.entity.UserEntity;
 import ru.neirodev.mehanik.entity.UserRatingEntity;
@@ -15,7 +15,7 @@ public interface UserService {
 
     void delete(UserEntity userEntity);
 
-    void setField(SetFieldRequest request);
+    void setField(SetFieldDTO request);
 
     void update(UserDTO userDTO, UserEntity userEntity);
 

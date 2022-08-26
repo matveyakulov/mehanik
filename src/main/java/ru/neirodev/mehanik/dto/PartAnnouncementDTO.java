@@ -38,6 +38,9 @@ public class PartAnnouncementDTO {
     @Schema(description = "Адрес")
     private String address;
 
+    @Schema(description = "Название города")
+    private String city;
+
     @Schema(description = "Цена")
     private Integer price;
 

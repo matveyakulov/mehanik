@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.neirodev.mehanik.dto.SetFieldRequest;
 import ru.neirodev.mehanik.dto.UserDTO;
@@ -31,20 +32,8 @@ public class UserController {
         this.userService = userService;
     }
 
-    @Operation(summary = "Создание пользователя")
-    @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class)))
-    @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
-    @PostMapping("")
-    public ResponseEntity<?> create(@RequestBody final UserDTO userDTO) {
-        try {
-            return ResponseEntity.ok().body(userService.save(userDTO));
-        } catch (Exception ex) {
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    @Operation(summary = "Обновление нескольких полей пользователя(обновятся все, которые не null у входящего обьекта)")
+    @PreAuthorize("hasAnyAuthority('USER')")
+    @Operation(summary = "Обновление нескольких полей пользователя(обновятся все, которые не null у входящего объекта)")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_ACCEPTED)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким id не найден")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
@@ -64,6 +53,7 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('USER')")
     @Operation(summary = "Обновление одного поля пользователя")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_ACCEPTED)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR, description = "Поле не существует")
@@ -96,20 +86,19 @@ public class UserController {
         return new ResponseEntity<>("Пользователь с таким id не найден", NOT_FOUND);
     }
 
-    @Operation(summary = "Получение пользователя по номер телефона")
+    @PreAuthorize("hasAnyAuthority('USER')")
+    @Operation(summary = "Получение данных о текущем пользователе")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
             description = "Пользователь",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class)))
-    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким номером телефона не найден")
-    @GetMapping
-    public ResponseEntity<?> getByPhone(
-            @Parameter(description = "Номер телефона пользователя", required = true)
-            @RequestParam String phone) {
-        Optional<UserEntity> repUser = userService.getByPhone(phone);
-        if (repUser.isPresent()) {
-            return ResponseEntity.ok().body(repUser.get());
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
+    @GetMapping("/me")
+    public ResponseEntity<?> getByPhone() {
+        try {
+            return ResponseEntity.ok().body(userService.getCurrentUser());
+        } catch (Exception e){
+            return ResponseEntity.internalServerError().build();
         }
-        return new ResponseEntity<>("Пользователь с таким номером телефона не найден", NOT_FOUND);
     }
 
     @Operation(summary = "Получение пользователя по id")
@@ -129,7 +118,7 @@ public class UserController {
 
     @Operation(summary = "Получение рейтинга пользователя по id")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class)))
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Double.class)))
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким id не найден")
     @GetMapping("/{id}/rating")
     public ResponseEntity<?> getRatingById(
@@ -142,10 +131,11 @@ public class UserController {
         return new ResponseEntity<>("Пользователь с таким id не найден", NOT_FOUND);
     }
 
+    @PreAuthorize("hasAnyAuthority('USER')")
     @Operation(summary = "Добавление оценки пользователю")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
-    @PostMapping("{id}/rating")
+    @PostMapping("/{id}/rating")
     public ResponseEntity<?> addRatingRow(
             @Parameter(description = "Идентификатор пользователя, которому ставится оценка", required = true)
             @PathVariable final Long id,
@@ -159,15 +149,16 @@ public class UserController {
         }
     }
 
-    @Operation(summary = "Получение поставленной оценки пользователю")
-    @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK, description = "Если есть - значение оценки, если нет - 0")
-    @GetMapping("{id}/myRating")
+    @PreAuthorize("hasAnyAuthority('USER')")
+    @Operation(summary = "Получение поставленной оценки пользователю с id от текущего пользователя")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK, description = "Если есть - значение оценки, если нет - -1")
+    @GetMapping("/{id}/myRating")
     public ResponseEntity<?> getRatingRow(
             @Parameter(description = "Идентификатор пользователя, у которого проверяем поставлена оценка", required = true)
             @PathVariable final Long id) {
         Optional<UserRatingEntity> repUserRating = userService.getRatingRowByUserToId(id);
         if(repUserRating.isEmpty()){
-            return ResponseEntity.ok().body(0);
+            return ResponseEntity.ok().body(-1);
         } else {
             return ResponseEntity.ok().body(repUserRating.get().getValue());
         }

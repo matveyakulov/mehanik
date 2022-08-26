@@ -74,7 +74,7 @@ public class AuthController {
             @Parameter(name = "Код подтверждения")
             @RequestParam final String code,
             final HttpServletRequest request, final HttpServletResponse response) {
-        Optional<UserEntity> user = userService.getByPhone(phone);
+        Optional<UserEntity> user = userService.findByPhone(phone);
         if (user.isPresent()) {
             if (user.get().getSmscode().equals(code)) {
                 return ResponseEntity.ok().body(authService.startSession(user.get(), request, response));

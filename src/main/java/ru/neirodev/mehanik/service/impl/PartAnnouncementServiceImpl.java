@@ -2,10 +2,11 @@ package ru.neirodev.mehanik.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.neirodev.mehanik.dto.PartAnnouncementDTO;
-import ru.neirodev.mehanik.entity.PartAnnouncement;
+import ru.neirodev.mehanik.entity.PartAnnouncementEntity;
 import ru.neirodev.mehanik.repository.PartAnnouncementRepository;
 import ru.neirodev.mehanik.service.PartAnnouncementService;
 
@@ -25,37 +26,45 @@ public class PartAnnouncementServiceImpl implements PartAnnouncementService {
     @Transactional(readOnly = true)
     @Override
     public List<PartAnnouncementDTO> getAllDTO(Boolean archive) {
-        return partAnnouncementRepository.getAllDTO(archive);
+        Long id = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return partAnnouncementRepository.getAllDTO(archive, id);
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<PartAnnouncementDTO> getAllDTO(Pageable pageable, Boolean archive) {
-        return partAnnouncementRepository.getAllDTO(pageable, archive);
+        Long id = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return partAnnouncementRepository.getAllDTO(pageable, archive, id);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<PartAnnouncement> findById(Long id) {
+    public Optional<PartAnnouncementEntity> findById(Long id) {
         return partAnnouncementRepository.findById(id);
     }
 
     @Transactional
     @Override
     public void addToArchive(Long id) {
-        PartAnnouncement partAnnouncement = partAnnouncementRepository.getReferenceById(id);
-        partAnnouncement.setArchive(!partAnnouncement.getArchive());
+        PartAnnouncementEntity partAnnouncementEntity = partAnnouncementRepository.getReferenceById(id);
+        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userId.equals(partAnnouncementEntity.getOwnerId())) {
+            partAnnouncementEntity.setArchive(!partAnnouncementEntity.getArchive());
+        }
     }
 
     @Transactional
     @Override
-    public PartAnnouncement save(PartAnnouncement partAnnouncement) {
-        return partAnnouncementRepository.save(partAnnouncement);
+    public PartAnnouncementEntity save(PartAnnouncementEntity partAnnouncementEntity) {
+        return partAnnouncementRepository.save(partAnnouncementEntity);
     }
 
     @Transactional
     @Override
-    public void delete(PartAnnouncement partAnnouncement) {
-        partAnnouncementRepository.delete(partAnnouncement);
+    public void delete(PartAnnouncementEntity partAnnouncementEntity) {
+        Long id = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (id.equals(partAnnouncementEntity.getOwnerId())) {
+            partAnnouncementRepository.delete(partAnnouncementEntity);
+        }
     }
 }

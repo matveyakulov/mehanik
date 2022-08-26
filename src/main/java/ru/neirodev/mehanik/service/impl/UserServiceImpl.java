@@ -24,6 +24,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     private final UserRatingRepository userRatingRepository;
+
     private final RoleRepository roleRepository;
 
     @Autowired
@@ -83,7 +84,14 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<UserEntity> getByPhone(String phone) {
+    public UserEntity getCurrentUser() {
+        Long id = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userRepository.getReferenceById(id);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<UserEntity> findByPhone(String phone) {
         return userRepository.findByPhone(phone);
     }
 

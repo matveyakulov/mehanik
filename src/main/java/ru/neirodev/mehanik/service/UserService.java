@@ -19,7 +19,9 @@ public interface UserService {
 
     void update(UserDTO userDTO, UserEntity userEntity);
 
-    Optional<UserEntity> getByPhone(String phone);
+    UserEntity getCurrentUser();
+
+    Optional<UserEntity> findByPhone(String phone);
 
     double getRatingById(Long id);
 

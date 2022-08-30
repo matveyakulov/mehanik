@@ -7,7 +7,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.neirodev.mehanik.dto.FilterDTO;
 import ru.neirodev.mehanik.dto.PartAnnouncementDTO;
 import ru.neirodev.mehanik.entity.PartAnnouncementEntity;
 import ru.neirodev.mehanik.repository.PartAnnouncementRepository;
@@ -75,14 +74,15 @@ public class PartAnnouncementServiceImpl implements PartAnnouncementService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<PartAnnouncementDTO> getAllDTO(FilterDTO filterDTO) {
-        Pageable pageable = PageRequest.of(filterDTO.getPageNum(), filterDTO.getPageSize(), Sort.Direction.ASC, "dateCreate");
-        List<PartAnnouncementDTO> dtos = partAnnouncementRepository.getAllDTO(filterDTO.getTypes(), filterDTO.getBrands(), filterDTO.getNameOfPart(),
-                filterDTO.getStartPrice(), filterDTO.getEndPrice(), filterDTO.getCondition(), filterDTO.getOriginal(),
-                filterDTO.getIsCompany(), pageable);
-        if(filterDTO.getCity() != null){
+    public List<PartAnnouncementDTO> getAllDTO(
+            String city, List<String> types, List<String> brands, String nameOfPart, Integer startPrice, Integer endPrice,
+            Boolean condition, Boolean isCompany, Boolean original, Integer pageNum, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.Direction.ASC, "dateCreate");
+        List<PartAnnouncementDTO> dtos = partAnnouncementRepository.getAllDTO(types, brands, nameOfPart,
+                startPrice, endPrice, condition, original, isCompany, pageable);
+        if (city != null) {
             LinkedList<PartAnnouncementDTO> partAnnouncementDTOS = dtos.stream()
-                    .filter(dto -> dto.getCity().equals(filterDTO.getCity()))
+                    .filter(dto -> dto.getCity().equals(city))
                     .collect(Collectors.toCollection(LinkedList::new));
             dtos.removeAll(partAnnouncementDTOS);
             partAnnouncementDTOS.addAll(dtos);

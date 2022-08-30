@@ -1,7 +1,6 @@
 package ru.neirodev.mehanik.service;
 
 import org.springframework.data.domain.Pageable;
-import ru.neirodev.mehanik.dto.FilterDTO;
 import ru.neirodev.mehanik.dto.PartAnnouncementDTO;
 import ru.neirodev.mehanik.entity.PartAnnouncementEntity;
 
@@ -20,5 +19,7 @@ public interface PartAnnouncementService {
     PartAnnouncementEntity save(PartAnnouncementEntity partAnnouncementEntity);
     void delete(PartAnnouncementEntity partAnnouncementEntity);
 
-    List<PartAnnouncementDTO> getAllDTO(FilterDTO filterDTO);
+    List<PartAnnouncementDTO> getAllDTO(String city, List<String> types, List<String> brands, String nameOfPart,
+                                        Integer startPrice, Integer endPrice, Boolean aBoolean, Boolean condition,
+                                        Boolean isCompany, Integer pageNum, Integer pageSize);
 }

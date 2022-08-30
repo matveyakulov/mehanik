@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.neirodev.mehanik.dto.SetFieldDTO;
+import ru.neirodev.mehanik.dto.SetFieldRequest;
 import ru.neirodev.mehanik.dto.UserDTO;
 import ru.neirodev.mehanik.entity.UserEntity;
 import ru.neirodev.mehanik.entity.UserRatingEntity;
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void setField(SetFieldDTO request) {
+    public void setField(SetFieldRequest request) {
         Optional<UserEntity> repUser = userRepository.findById(request.getId());
         if (repUser.isPresent()) {
             UserEntity userEntity = repUser.get();

@@ -1,14 +1,11 @@
 package ru.neirodev.mehanik.api.request;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
 
-@Data
+@AllArgsConstructor
 public class GetMakesRequest extends Request {
 
     private String group;
 
     private final String method = "getMakes";
-
-    private String key;
-
 }

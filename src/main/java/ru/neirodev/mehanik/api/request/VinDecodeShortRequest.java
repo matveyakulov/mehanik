@@ -1,11 +1,10 @@
 package ru.neirodev.mehanik.api.request;
 
-import lombok.Setter;
+import lombok.AllArgsConstructor;
 
-@Setter
+@AllArgsConstructor
 public class VinDecodeShortRequest extends Request {
 
     private final String method = "VINdecodeShort";
     private String vin;
-    private String key;
 }

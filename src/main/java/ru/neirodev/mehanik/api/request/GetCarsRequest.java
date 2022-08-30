@@ -1,18 +1,12 @@
 package ru.neirodev.mehanik.api.request;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
 
-@Data
+@AllArgsConstructor
 public class GetCarsRequest extends Request {
 
-    private Long model;
-
     private Long make;
-
-    private final String method = "getCars";
-
+    private Long model;
     private String group;
-
-    private String key;
-
+    private final String method = "getCars";
 }

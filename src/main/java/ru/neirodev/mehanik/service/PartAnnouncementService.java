@@ -9,8 +9,8 @@ import java.util.Optional;
 
 public interface PartAnnouncementService {
 
-    List<PartAnnouncementDTO> getAllDTO(Boolean archive);
-    List<PartAnnouncementDTO> getAllDTO(Pageable pageable, Boolean archive);
+    List<PartAnnouncementDTO> getAllCurrentDTO(Boolean archive);
+    List<PartAnnouncementDTO> getAllCurrentDTO(Pageable pageable, Boolean archive);
 
     Optional<PartAnnouncementEntity> findById(Long id);
 
@@ -18,4 +18,8 @@ public interface PartAnnouncementService {
 
     PartAnnouncementEntity save(PartAnnouncementEntity partAnnouncementEntity);
     void delete(PartAnnouncementEntity partAnnouncementEntity);
+
+    List<PartAnnouncementDTO> getAllDTO(String city, List<String> types, List<String> brands, String nameOfPart,
+                                        Integer startPrice, Integer endPrice, Boolean aBoolean, Boolean condition,
+                                        Boolean isCompany, Integer pageNum, Integer pageSize);
 }

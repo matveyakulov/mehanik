@@ -6,10 +6,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.JoinColumn;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 
 @Schema(description = "Объявление о продаже запчасти")
@@ -49,11 +46,24 @@ public class PartAnnouncementEntity extends BaseEntity{
     @Schema(description = "Цена")
     private Integer price;
 
-    @Schema(description = "Адрес")
+    @Schema(description = "Полный адрес")
     private String address;
+
+    @Schema(description = "Название города")
+    private String city;
+
+    @Schema(description = "Широта")
+    private Double latitude;
+
+    @Schema(description = "Долгота")
+    private Double longitude;
 
     @Schema(description = "Фото")
     private String photo;
+
+    @Schema(description = "true - компания, иначе частник")
+    @Column(name = "is_company")
+    private Boolean isCompany;
 
     @Schema(description = "Дата размещения", accessMode = Schema.AccessMode.READ_ONLY)
     @CreatedDate

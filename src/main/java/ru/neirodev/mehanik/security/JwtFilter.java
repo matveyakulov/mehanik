@@ -42,7 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
             encodedJwtToken = getCookieJwtToken(request);
 
         try {
-            if ((encodedJwtToken != null) && !encodedJwtToken.isEmpty()) {
+            if (encodedJwtToken != null && !encodedJwtToken.isEmpty()) {
                 String role = jwtTokenUtil.getPermsFromToken(encodedJwtToken);
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role);
                 SecurityContextHolder.getContext().setAuthentication(new JwtAuthentication(true,

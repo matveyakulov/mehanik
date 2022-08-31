@@ -54,7 +54,7 @@ public class PartAnnouncementController {
     @Operation(summary = "Получение объявления по id")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PartAnnouncementEntity.class)))
-    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким id не найден")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Объявление с таким id не найден")
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable final Long id) {
         Optional<PartAnnouncementEntity> partAnnouncement = partAnnouncementService.findById(id);
@@ -65,7 +65,7 @@ public class PartAnnouncementController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER')")
-    @Operation(summary = "Создание объявления")
+    @Operation(summary = "Создание / обновление объявления")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @PostMapping

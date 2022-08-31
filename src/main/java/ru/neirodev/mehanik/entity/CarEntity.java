@@ -4,11 +4,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import ru.neirodev.mehanik.enums.CarType;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.JoinColumn;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Schema(description = "ТС")
 @EntityListeners(AuditingEntityListener.class)
@@ -21,7 +19,8 @@ public class CarEntity extends BaseEntity {
     private String vin;
 
     @Schema(description = "Тип")
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private CarType type;
 
     @Schema(description = "Марка")
     private String brand;

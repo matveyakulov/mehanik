@@ -58,10 +58,10 @@ public class PartAnnouncementController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable final Long id) {
         Optional<PartAnnouncementEntity> partAnnouncement = partAnnouncementService.findById(id);
-        if (partAnnouncement.isPresent()){
+        if (partAnnouncement.isPresent()) {
             return ResponseEntity.ok().body(partAnnouncement.get());
         }
-        return new ResponseEntity<>("Объявление с таким id не найдено",  NOT_FOUND);
+        return new ResponseEntity<>("Объявление с таким id не найдено", NOT_FOUND);
     }
 
     @PreAuthorize("hasAnyAuthority('USER')")
@@ -69,10 +69,10 @@ public class PartAnnouncementController {
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody final PartAnnouncementEntity partAnnouncementEntity){
+    public ResponseEntity<?> save(@RequestBody final PartAnnouncementEntity partAnnouncementEntity) {
         try {
             return ResponseEntity.ok().body(partAnnouncementService.save(partAnnouncementEntity));
-        } catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -84,11 +84,11 @@ public class PartAnnouncementController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable final Long id) {
         Optional<PartAnnouncementEntity> partAnnouncement = partAnnouncementService.findById(id);
-        if (partAnnouncement.isPresent()){
+        if (partAnnouncement.isPresent()) {
             partAnnouncementService.delete(partAnnouncement.get());
             return ResponseEntity.ok().build();
         }
-        return new ResponseEntity<>("Объявление с таким id не найдено",  NOT_FOUND);
+        return new ResponseEntity<>("Объявление с таким id не найдено", NOT_FOUND);
     }
 
     @PreAuthorize("hasAnyAuthority('USER')")
@@ -96,13 +96,12 @@ public class PartAnnouncementController {
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Объявление с таким id не найдено")
     @PostMapping("/{id}/archive")
-    public ResponseEntity<?> addToArchive(@PathVariable final Long id){
-        Optional<PartAnnouncementEntity> partAnnouncement = partAnnouncementService.findById(id);
-        if (partAnnouncement.isPresent()){
+    public ResponseEntity<?> addToArchive(@PathVariable final Long id) {
+        if (partAnnouncementService.existsById(id)) {
             partAnnouncementService.addToArchive(id);
             return ResponseEntity.ok().build();
         }
-        return new ResponseEntity<>("Объявление с таким id не найдено",  NOT_FOUND);
+        return new ResponseEntity<>("Объявление с таким id не найдено", NOT_FOUND);
     }
 
 }

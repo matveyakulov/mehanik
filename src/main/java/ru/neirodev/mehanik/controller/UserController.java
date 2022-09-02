@@ -93,7 +93,7 @@ public class UserController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class)))
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @GetMapping("/me")
-    public ResponseEntity<?> getByPhone() {
+    public ResponseEntity<?> getCurrent() {
         try {
             return ResponseEntity.ok().body(userService.getCurrentUser());
         } catch (Exception e){

@@ -67,4 +67,10 @@ public class PartAnnouncementServiceImpl implements PartAnnouncementService {
             partAnnouncementRepository.delete(partAnnouncementEntity);
         }
     }
+
+    @Transactional(readOnly = true)
+    @Override
+    public boolean existsById(Long id) {
+        return partAnnouncementRepository.existsById(id);
+    }
 }

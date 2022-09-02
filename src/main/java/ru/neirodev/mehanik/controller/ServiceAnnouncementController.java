@@ -117,15 +117,14 @@ public class ServiceAnnouncementController {
         return new ResponseEntity<>("Объявление с таким id не найдено", NOT_FOUND);
     }
 
-    @PreAuthorize("hasAnyAuthority('USER')")
+    //@PreAuthorize("hasAnyAuthority('USER')")
     @Operation(summary = "Добавление фотографий в объявление (если она одна, то массив с одним элементом)")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Объявление с таким id не найдено")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @PostMapping("/{id}/photos")
     public ResponseEntity<?> addPhotos(@PathVariable final Long id, @RequestBody final List<String> photos) {
-        Optional<ServiceAnnouncementEntity> serviceAnnouncement = serviceAnnouncementService.findById(id);
-        if (serviceAnnouncement.isPresent()) {
+        if (serviceAnnouncementService.existsById(id)) {
             try {
                 serviceAnnouncementPhotoService.save(id, photos);
                 return ResponseEntity.ok().build();
@@ -143,8 +142,7 @@ public class ServiceAnnouncementController {
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @DeleteMapping("/{id}/photos")
     public ResponseEntity<?> deletePhotos(@PathVariable final Long id, @RequestBody final List<String> photos) {
-        Optional<ServiceAnnouncementEntity> serviceAnnouncement = serviceAnnouncementService.findById(id);
-        if (serviceAnnouncement.isPresent()) {
+        if (serviceAnnouncementService.existsById(id)) {
             try {
                 serviceAnnouncementPhotoService.delete(id, photos);
                 return ResponseEntity.ok().build();
@@ -162,8 +160,7 @@ public class ServiceAnnouncementController {
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @PostMapping("/{id}/types")
     public ResponseEntity<?> addTypes(@PathVariable final Long id, @RequestBody final List<CarType> types) {
-        Optional<ServiceAnnouncementEntity> serviceAnnouncement = serviceAnnouncementService.findById(id);
-        if (serviceAnnouncement.isPresent()) {
+        if (serviceAnnouncementService.existsById(id)) {
             try {
                 serviceAnnouncementCarTypeService.save(id, types);
                 return ResponseEntity.ok().build();
@@ -181,8 +178,7 @@ public class ServiceAnnouncementController {
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @DeleteMapping("/{id}/types")
     public ResponseEntity<?> deleteTypes(@PathVariable final Long id, @RequestBody final List<CarType> types) {
-        Optional<ServiceAnnouncementEntity> serviceAnnouncement = serviceAnnouncementService.findById(id);
-        if (serviceAnnouncement.isPresent()) {
+        if (serviceAnnouncementService.existsById(id)) {
             try {
                 serviceAnnouncementCarTypeService.delete(id, types);
                 return ResponseEntity.ok().build();
@@ -200,8 +196,7 @@ public class ServiceAnnouncementController {
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @PostMapping("/{id}/brands")
     public ResponseEntity<?> addBrands(@PathVariable final Long id, @RequestBody final List<String> brands) {
-        Optional<ServiceAnnouncementEntity> serviceAnnouncement = serviceAnnouncementService.findById(id);
-        if (serviceAnnouncement.isPresent()) {
+        if (serviceAnnouncementService.existsById(id)) {
             try {
                 serviceAnnouncementCarBrandService.save(id, brands);
                 return ResponseEntity.ok().build();
@@ -219,8 +214,7 @@ public class ServiceAnnouncementController {
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @DeleteMapping("/{id}/brands")
     public ResponseEntity<?> deleteBrands(@PathVariable final Long id, @RequestBody final List<String> brands) {
-        Optional<ServiceAnnouncementEntity> serviceAnnouncement = serviceAnnouncementService.findById(id);
-        if (serviceAnnouncement.isPresent()) {
+        if (serviceAnnouncementService.existsById(id)) {
             try {
                 serviceAnnouncementCarBrandService.delete(id, brands);
                 return ResponseEntity.ok().build();

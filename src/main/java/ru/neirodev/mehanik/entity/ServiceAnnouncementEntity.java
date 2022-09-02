@@ -2,6 +2,8 @@ package ru.neirodev.mehanik.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import ru.neirodev.mehanik.enums.ServiceType;
 
 import javax.persistence.*;
@@ -10,6 +12,7 @@ import java.util.Set;
 @Schema(description = "Избранное объявление о продаже")
 @Entity
 @Table(schema = "core", name = "service_announcements")
+@EntityListeners(AuditingEntityListener.class)
 @Data
 public class ServiceAnnouncementEntity extends BaseEntity{
 
@@ -52,4 +55,9 @@ public class ServiceAnnouncementEntity extends BaseEntity{
     @JoinTable(schema = "core", name = "service_announcements_photo", joinColumns = @JoinColumn(name = "service_announcement_id"))
     @Column(name = "photo")
     private Set<String> photos;
+
+    @Schema(description = "Владелец объявления", accessMode = Schema.AccessMode.READ_ONLY)
+    @CreatedBy
+    @JoinColumn(name = "owner_id", updatable = false)
+    private Long ownerId;
 }

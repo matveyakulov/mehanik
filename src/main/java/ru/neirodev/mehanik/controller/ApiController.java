@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.neirodev.mehanik.api.model.*;
 import ru.neirodev.mehanik.enums.CarType;
+import ru.neirodev.mehanik.enums.PartType;
 import ru.neirodev.mehanik.service.ApiService;
 
 import javax.servlet.http.HttpServletResponse;
@@ -28,14 +29,21 @@ public class ApiController {
         this.apiService = apiService;
     }
 
-    @Operation(description = "Список транспортных средств")
+    @Operation(description = "Список транспортных средств для всех методов, кроме /carParts")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @GetMapping("/carTypes")
     public CarType[] carTypes() {
         return CarType.class.getEnumConstants();
     }
 
-    @Operation(summary = "Список марок машин")
+    @Operation(description = "Список транспортных средств и частей для метода /carParts")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
+    @GetMapping("/partTypes")
+    public PartType[] partTypes() {
+        return PartType.class.getEnumConstants();
+    }
+
+    @Operation(summary = "Список марок машин, производителей осей")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = Make.class)))
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
@@ -94,11 +102,11 @@ public class ApiController {
     @GetMapping("/carParts")
     public ResponseEntity<?> carPartsList(
             @Parameter(description = "Тип транспортного средства")
-            @RequestParam final CarType carType,
+            @RequestParam final PartType partType,
             @Parameter(description = "Модификация машины(carId из /modifications")
             @RequestParam final Long kid) {
         try {
-            return ResponseEntity.ok().body(apiService.carPartsList(carType.getCode(), String.valueOf(kid)));
+            return ResponseEntity.ok().body(apiService.carPartsList(partType.getCode(), String.valueOf(kid)));
         } catch (Exception ex) {
             return ResponseEntity.internalServerError().build();
         }

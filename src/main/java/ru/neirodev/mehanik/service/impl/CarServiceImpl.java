@@ -25,15 +25,15 @@ public class CarServiceImpl implements CarService {
     @Transactional(readOnly = true)
     @Override
     public List<CarEntity> getAll() {
-        Long id = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return carRepository.findAllByUserId(id);
+        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return carRepository.findAllByUserId(userId);
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<CarEntity> getAll(Pageable pageable) {
-        Long id = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return carRepository.findAllByUserId(id, pageable);
+        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return carRepository.findAllByUserId(userId, pageable);
     }
 
     @Transactional(readOnly = true)
@@ -51,6 +51,9 @@ public class CarServiceImpl implements CarService {
     @Transactional
     @Override
     public void delete(CarEntity car) {
-        carRepository.delete(car);
+        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(userId.equals(car.getUserId())) {
+            carRepository.delete(car);
+        }
     }
 }

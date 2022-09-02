@@ -65,13 +65,27 @@ public class PartAnnouncementController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER')")
-    @Operation(summary = "Создание / обновление объявления")
+    @Operation(summary = "Создание объявления")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @PostMapping
     public ResponseEntity<?> save(@RequestBody final PartAnnouncementEntity partAnnouncementEntity) {
         try {
             return ResponseEntity.ok().body(partAnnouncementService.save(partAnnouncementEntity));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER')")
+    @Operation(summary = "Обновление объявления")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+    @PostMapping
+    public ResponseEntity<?> update(@RequestBody final PartAnnouncementEntity partAnnouncementEntity) {
+        try {
+            partAnnouncementService.update(partAnnouncementEntity);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }

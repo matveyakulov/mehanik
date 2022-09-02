@@ -6,7 +6,7 @@ import lombok.Data;
 
 import java.util.Date;
 
-@Schema(description = "Запчасть к модификации машины")
+@Schema(description = "Транспортный объект объявления о продаже")
 @AllArgsConstructor
 @Data
 public class PartAnnouncementDTO {

@@ -61,6 +61,15 @@ public class PartAnnouncementServiceImpl implements PartAnnouncementService {
 
     @Transactional
     @Override
+    public void update(PartAnnouncementEntity partAnnouncementEntity) {
+        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userId.equals(partAnnouncementEntity.getOwnerId())) {
+            partAnnouncementRepository.save(partAnnouncementEntity);
+        }
+    }
+
+    @Transactional
+    @Override
     public void delete(PartAnnouncementEntity partAnnouncementEntity) {
         Long id = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (id.equals(partAnnouncementEntity.getOwnerId())) {

@@ -10,8 +10,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.neirodev.mehanik.dto.ServiceAnnouncementDTO;
+import ru.neirodev.mehanik.dto.ServiceAnnouncementShowDTO;
+import ru.neirodev.mehanik.dto.SetFieldRequest;
 import ru.neirodev.mehanik.entity.PartAnnouncementEntity;
 import ru.neirodev.mehanik.entity.ServiceAnnouncementEntity;
 import ru.neirodev.mehanik.enums.CarType;
@@ -21,6 +24,7 @@ import ru.neirodev.mehanik.service.ServiceAnnouncementCarTypeService;
 import ru.neirodev.mehanik.service.ServiceAnnouncementPhotoService;
 import ru.neirodev.mehanik.service.ServiceAnnouncementService;
 
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Optional;
@@ -54,8 +58,8 @@ public class ServiceAnnouncementController {
     @Operation(summary = "Список объявлений")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
             content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ServiceAnnouncementDTO.class)))
-    public List<ServiceAnnouncementDTO> getAllDTO(
+                    schema = @Schema(implementation = ServiceAnnouncementShowDTO.class)))
+    public List<ServiceAnnouncementShowDTO> getAllDTO(
             @Parameter(description = "Номер страницы(с 0)")
             @RequestParam(required = false) final Integer pageNum,
             @Parameter(description = "Размер страницы(с 1)")
@@ -83,7 +87,7 @@ public class ServiceAnnouncementController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER')")
-    @Operation(summary = "Создание / обновление объявления")
+    @Operation(summary = "Создание обновления объявления")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @PostMapping
@@ -96,6 +100,44 @@ public class ServiceAnnouncementController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER')")
+    @Operation(summary = "Обновление нескольких полей объявления(обновятся все, которые не null у входящего объекта)")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_ACCEPTED)
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Объявление с таким id не найдено")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+    @PutMapping("")
+    public ResponseEntity<?> update(
+            @RequestBody final ServiceAnnouncementDTO serviceAnnouncementDTO) {
+        try {
+            Optional<ServiceAnnouncementEntity> repServiceAnnouncement = serviceAnnouncementService.findById(serviceAnnouncementDTO.getId());
+            if (repServiceAnnouncement.isPresent()) {
+                serviceAnnouncementService.update(serviceAnnouncementDTO, repServiceAnnouncement.get());
+                return ResponseEntity.accepted().build();
+            }
+            return new ResponseEntity<>("Объявление с таким id не найдено", NOT_FOUND);
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER')")
+    @Operation(summary = "Обновление одного поля")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_ACCEPTED)
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR, description = "Поле не существует")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR, description = "Поле не изменено из-за ошибки")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Объявление с таким id не найдено")
+    @PutMapping("/field")
+    public ResponseEntity<?> update(@RequestBody final SetFieldRequest request) {
+        try {
+            serviceAnnouncementService.setField(request);
+            return ResponseEntity.accepted().build();
+        } catch (EntityNotFoundException ex) {
+            return new ResponseEntity<>(ex.getMessage(), NOT_FOUND);
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body(ex.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER')")
     @Operation(summary = "Удаление объявления(если текущий пользователь создавал его. Все фотки, марки и типы ТС удалятся автоматически)")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Объявление с таким id не найдено")
@@ -104,20 +146,23 @@ public class ServiceAnnouncementController {
     public ResponseEntity<?> deleteById(@PathVariable final Long id) {
         Optional<ServiceAnnouncementEntity> serviceAnnouncement = serviceAnnouncementService.findById(id);
         if (serviceAnnouncement.isPresent()) {
-            try {
-                serviceAnnouncementService.delete(serviceAnnouncement.get());
-                serviceAnnouncementPhotoService.deleteByAnnouncementId(id);
-                serviceAnnouncementCarBrandService.deleteByAnnouncementId(id);
-                serviceAnnouncementCarTypeService.deleteByAnnouncementId(id);
-                return ResponseEntity.ok().build();
-            } catch (Exception e) {
-                return ResponseEntity.internalServerError().build();
+            Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (userId.equals(serviceAnnouncement.get().getOwnerId())) {
+                try {
+                    serviceAnnouncementService.delete(serviceAnnouncement.get());
+                    serviceAnnouncementPhotoService.deleteByAnnouncementId(id);
+                    serviceAnnouncementCarBrandService.deleteByAnnouncementId(id);
+                    serviceAnnouncementCarTypeService.deleteByAnnouncementId(id);
+                    return ResponseEntity.ok().build();
+                } catch (Exception e) {
+                    return ResponseEntity.internalServerError().build();
+                }
             }
         }
         return new ResponseEntity<>("Объявление с таким id не найдено", NOT_FOUND);
     }
 
-    //@PreAuthorize("hasAnyAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER')")
     @Operation(summary = "Добавление фотографий в объявление (если она одна, то массив с одним элементом)")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Объявление с таким id не найдено")

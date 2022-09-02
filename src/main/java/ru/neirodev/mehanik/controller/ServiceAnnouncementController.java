@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.neirodev.mehanik.dto.ServiceAnnouncementDTO;
 import ru.neirodev.mehanik.dto.ServiceAnnouncementShowDTO;
@@ -145,14 +146,17 @@ public class ServiceAnnouncementController {
     public ResponseEntity<?> deleteById(@PathVariable final Long id) {
         Optional<ServiceAnnouncementEntity> serviceAnnouncement = serviceAnnouncementService.findById(id);
         if (serviceAnnouncement.isPresent()) {
-            try {
-                serviceAnnouncementService.delete(serviceAnnouncement.get());
-                serviceAnnouncementPhotoService.deleteByAnnouncementId(id);
-                serviceAnnouncementCarBrandService.deleteByAnnouncementId(id);
-                serviceAnnouncementCarTypeService.deleteByAnnouncementId(id);
-                return ResponseEntity.ok().build();
-            } catch (Exception e) {
-                return ResponseEntity.internalServerError().build();
+            Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (userId.equals(serviceAnnouncement.get().getOwnerId())) {
+                try {
+                    serviceAnnouncementService.delete(serviceAnnouncement.get());
+                    serviceAnnouncementPhotoService.deleteByAnnouncementId(id);
+                    serviceAnnouncementCarBrandService.deleteByAnnouncementId(id);
+                    serviceAnnouncementCarTypeService.deleteByAnnouncementId(id);
+                    return ResponseEntity.ok().build();
+                } catch (Exception e) {
+                    return ResponseEntity.internalServerError().build();
+                }
             }
         }
         return new ResponseEntity<>("Объявление с таким id не найдено", NOT_FOUND);

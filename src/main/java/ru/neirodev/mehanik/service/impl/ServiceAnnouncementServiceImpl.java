@@ -2,6 +2,7 @@ package ru.neirodev.mehanik.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.neirodev.mehanik.dto.ServiceAnnouncementDTO;
@@ -70,14 +71,17 @@ public class ServiceAnnouncementServiceImpl implements ServiceAnnouncementServic
         Optional<ServiceAnnouncementEntity> repServiceAnnouncement = serviceAnnouncementRepository.findById(request.getId());
         if (repServiceAnnouncement.isPresent()) {
             ServiceAnnouncementEntity serviceAnnouncement = repServiceAnnouncement.get();
-            try {
-                Field field = ServiceAnnouncementEntity.class.getDeclaredField(request.getFieldName());
-                field.setAccessible(true);
-                field.set(serviceAnnouncement, request.getFieldValue());
-            } catch (NoSuchFieldException e) {
-                throw new RuntimeException("Поле не существует", e);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Поле не изменено из-за ошибки", e);
+            Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (userId.equals(serviceAnnouncement.getOwnerId())) {
+                try {
+                    Field field = ServiceAnnouncementEntity.class.getDeclaredField(request.getFieldName());
+                    field.setAccessible(true);
+                    field.set(serviceAnnouncement, request.getFieldValue());
+                } catch (NoSuchFieldException e) {
+                    throw new RuntimeException("Поле не существует", e);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException("Поле не изменено из-за ошибки", e);
+                }
             }
         } else throw new EntityNotFoundException("Объявление с таким id не найден");
     }
@@ -85,7 +89,10 @@ public class ServiceAnnouncementServiceImpl implements ServiceAnnouncementServic
     @Transactional
     @Override
     public void update(ServiceAnnouncementDTO serviceAnnouncementDTO, ServiceAnnouncementEntity serviceAnnouncementEntity) {
-        ServiceAnnouncementMapper.INSTANCE.updateServiceAnnouncementFromDTO(serviceAnnouncementDTO, serviceAnnouncementEntity);
-        serviceAnnouncementRepository.save(serviceAnnouncementEntity);
+        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userId.equals(serviceAnnouncementEntity.getOwnerId())) {
+            ServiceAnnouncementMapper.INSTANCE.updateServiceAnnouncementFromDTO(serviceAnnouncementDTO, serviceAnnouncementEntity);
+            serviceAnnouncementRepository.save(serviceAnnouncementEntity);
+        }
     }
 }

@@ -18,4 +18,6 @@ public interface PartAnnouncementService {
 
     PartAnnouncementEntity save(PartAnnouncementEntity partAnnouncementEntity);
     void delete(PartAnnouncementEntity partAnnouncementEntity);
+
+    boolean existsById(Long id);
 }

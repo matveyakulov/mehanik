@@ -34,14 +34,14 @@ public class PartAnnouncementDTO {
     @Schema(description = "Номер запчасти")
     private String numberOfPart;
 
+    @Schema(description = "Название города")
+    private String city;
+
     @Schema(description = "Фото")
     private String photo;
 
     @Schema(description = "Адрес")
     private String address;
-
-    @Schema(description = "Название города")
-    private String city;
 
     @Schema(description = "Цена")
     private Integer price;

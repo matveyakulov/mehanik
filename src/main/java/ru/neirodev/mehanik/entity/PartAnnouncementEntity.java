@@ -52,6 +52,18 @@ public class PartAnnouncementEntity extends BaseEntity{
     @Schema(description = "Адрес")
     private String address;
 
+    @Schema(description = "Город")
+    private String city;
+
+    @Schema(description = "Долгота")
+    private Double longitude;
+
+    @Schema(description = "Широта")
+    private Double latitude;
+
+    @Schema(description = "true - компания, иначе - физлицо")
+    private Boolean isCompany;
+
     @Schema(description = "Фото")
     private String photo;
 

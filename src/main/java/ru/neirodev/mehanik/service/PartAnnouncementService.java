@@ -25,4 +25,8 @@ public interface PartAnnouncementService {
                                         List<String> types, List<String> brands,
                                         String nameOfPart, Integer startPrice, Integer endPrice, Boolean aBoolean,
                                         Boolean condition, Boolean isCompany, Integer pageNum, Integer pageSize);
+
+    void update(PartAnnouncementEntity partAnnouncementEntity);
+
+    boolean existsById(Long id);
 }

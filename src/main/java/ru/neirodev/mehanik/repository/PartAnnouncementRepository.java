@@ -12,14 +12,14 @@ import java.util.List;
 @Repository
 public interface PartAnnouncementRepository extends JpaRepository<PartAnnouncementEntity, Long> {
 
-    @Query(value = "SELECT new ru.neirodev.mehanik.dto.PartAnnouncementDTO(pa.id, pa.type, pa.brand, pa.model," +
+    @Query(value = "SELECT new ru.neirodev.mehanik.dto.PartAnnouncementDTO(pa.id, pa.type, pa.brand, pa.model, " +
             "pa.generation, pa.nameOfPart, pa.numberOfPart, pa.city, pa.photo, pa.address, pa.price, pa.dateCreate, pa.archive, " +
             "pa.longitude, pa.latitude) " +
             "FROM PartAnnouncementEntity pa " +
             "WHERE pa.archive = :archive OR :archive IS NULL AND pa.ownerId = :userId")
-    List<PartAnnouncementDTO> getAllDTO(Pageable pageable, Boolean archive, Long userId);
+    List<PartAnnouncementDTO> getAllCurrentDTO(Pageable pageable, Boolean archive, Long userId);
 
-    @Query(value = "SELECT new ru.neirodev.mehanik.dto.PartAnnouncementDTO(pa.id, pa.type, pa.brand, pa.model," +
+    @Query(value = "SELECT new ru.neirodev.mehanik.dto.PartAnnouncementDTO(pa.id, pa.type, pa.brand, pa.model, " +
             "pa.generation, pa.nameOfPart, pa.numberOfPart, pa.city, pa.photo, pa.address, pa.price, pa.dateCreate, pa.archive, " +
             "pa.longitude, pa.latitude) " +
             "FROM PartAnnouncementEntity pa " +

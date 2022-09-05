@@ -73,7 +73,7 @@ public class PartAnnouncementController {
     @Operation(summary = "Список объявлений о продаже у текущего пользователя")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PartAnnouncementDTO.class)))
-    @GetMapping("/DTO")
+    @GetMapping("/me")
     public List<PartAnnouncementDTO> getAllDTO(
             @Parameter(description = "Номер страницы(с 0)")
             @RequestParam(required = false) final Integer pageNum,
@@ -83,9 +83,9 @@ public class PartAnnouncementController {
             @RequestParam(required = false) final Boolean archive) {
         if (pageSize != null && pageSize > 0 && pageNum != null && pageNum > -1) {
             Pageable pageable = PageRequest.of(pageNum, pageSize);
-            return partAnnouncementService.getAllDTO(pageable, archive);
+            return partAnnouncementService.getAllCurrentDTO(pageable, archive);
         }
-        return partAnnouncementService.getAllDTO(archive);
+        return partAnnouncementService.getAllCurrentDTO(archive);
     }
 
     @Operation(summary = "Получение объявления по id")
@@ -118,7 +118,7 @@ public class PartAnnouncementController {
     @Operation(summary = "Обновление объявления")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
-    @PostMapping
+    @PutMapping
     public ResponseEntity<?> update(@RequestBody final PartAnnouncementEntity partAnnouncementEntity) {
         try {
             partAnnouncementService.update(partAnnouncementEntity);

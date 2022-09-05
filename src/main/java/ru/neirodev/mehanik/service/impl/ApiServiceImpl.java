@@ -55,8 +55,7 @@ public class ApiServiceImpl implements ApiService {
     @Cacheable(value = "makes", key = "#group")
     @Override
     public List<Make> getMakesRequest(String group) {
-        GetMakesRequest request = new GetMakesRequest();
-        request.setGroup(group);
+        GetMakesRequest request = new GetMakesRequest(group);
         request.setKey(getMakesKey);
         String body = getBodyFromRequest(request);
         if (body != null) {
@@ -73,9 +72,7 @@ public class ApiServiceImpl implements ApiService {
     @Cacheable(value = "models", key = "#make")
     @Override
     public List<Model> getModelsRequest(Long make, String group) {
-        GetModelsRequest request = new GetModelsRequest();
-        request.setMake(make);
-        request.setGroup(group);
+        GetModelsRequest request = new GetModelsRequest(make, group);
         request.setKey(getModelsKey);
         String body = getBodyFromRequest(request);
         if (body != null) {
@@ -92,10 +89,7 @@ public class ApiServiceImpl implements ApiService {
     @Cacheable(value = "cars", key = "#model")
     @Override
     public List<Car> getCarsRequest(Long make, Long model, String group) {
-        GetCarsRequest request = new GetCarsRequest();
-        request.setMake(make);
-        request.setModel(model);
-        request.setGroup(group);
+        GetCarsRequest request = new GetCarsRequest(make, model, group);
         request.setKey(getCarsKey);
         String body = getBodyFromRequest(request);
         if (body != null) {
@@ -116,9 +110,7 @@ public class ApiServiceImpl implements ApiService {
     @Cacheable(value = "carParts", key = "#kid")
     @Override
     public List<CarPart> carPartsList(String typeid, String kid) {
-        CarPartsListRequest request = new CarPartsListRequest();
-        request.setKid(kid);
-        request.setTypeid(typeid);
+        CarPartsListRequest request = new CarPartsListRequest(typeid, kid);
         request.setKey(carPartsListKey);
         String body = getBodyFromRequest(request);
         List<CarPartFromJson> carPartFromJsons;
@@ -134,8 +126,7 @@ public class ApiServiceImpl implements ApiService {
     @Cacheable(value = "vins", key = "#vin")
     @Override
     public List<VinDecode> vinDecodeShort(String vin) {
-        VinDecodeShortRequest request = new VinDecodeShortRequest();
-        request.setVin(vin);
+        VinDecodeShortRequest request = new VinDecodeShortRequest(vin);
         request.setKey(vinDecodeKey);
         String body = getBodyFromRequest(request);
         if (body != null) {
@@ -153,9 +144,7 @@ public class ApiServiceImpl implements ApiService {
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.ACCEPT, MediaType.TEXT_HTML_VALUE);
         HttpEntity<?> entity = new HttpEntity<>(headers);
-        String body = null;
-        body = restTemplate.exchange(request.getUri(), GET, entity, String.class, new HashMap<>()).getBody();
-
+        String body = restTemplate.exchange(request.getUri(), GET, entity, String.class, new HashMap<>()).getBody();
         return body != null ? StringUtils.replace(body, "'", "\"") : null;
     }
 }

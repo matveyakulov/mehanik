@@ -2,24 +2,18 @@ package ru.neirodev.mehanik.enums;
 
 public enum CarType {
 
-    PASSENGER("passenger", "2"),
-    COMMERCIAL("commercial", "16"),
-    MOTO("moto", "777");
+    PASSENGER("passenger"),
+    COMMERCIAL("commercial"),
+    MOTO("moto"),
+    AXLE("axle");
 
-    CarType(String name, String code) {
+    CarType(String name) {
         this.name = name;
-        this.code = code;
     }
 
     private final String name;
 
-    private final String code;
-
     public String getName() {
         return name;
-    }
-
-    public String getCode() {
-        return code;
     }
 }

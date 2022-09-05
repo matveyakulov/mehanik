@@ -3,9 +3,9 @@ package ru.neirodev.mehanik.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = "Объект для изменения одного протого поля(примитивного) у любого обьекта")
+@Schema(description = "Объект для изменения одного простого поля(примитивного) у любого объекта")
 @Data
-public class SetFieldDTO {
+public class SetFieldRequest {
 
     @Schema(description = "Идентификатор изменяемого обьекта")
     private Long id;

@@ -1,14 +1,14 @@
 package ru.neirodev.mehanik.api.request;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-@Data
+@AllArgsConstructor
+@Getter
 public class CarPartsListRequest extends Request {
 
-    private final String method = "CarPartsList";
     private String typeid;
     private String kid;
+    private final String method = "CarPartsList";
     private final String del = ":";
-    private String key;
-
 }

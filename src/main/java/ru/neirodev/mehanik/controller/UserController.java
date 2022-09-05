@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import ru.neirodev.mehanik.dto.SetFieldDTO;
+import ru.neirodev.mehanik.dto.SetFieldRequest;
 import ru.neirodev.mehanik.dto.UserDTO;
 import ru.neirodev.mehanik.entity.UserEntity;
 import ru.neirodev.mehanik.entity.UserRatingEntity;
@@ -60,7 +60,7 @@ public class UserController {
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR, description = "Поле не изменено из-за ошибки")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким id не найден")
     @PutMapping("/field")
-    public ResponseEntity<?> update(@RequestBody final SetFieldDTO request) {
+    public ResponseEntity<?> update(@RequestBody final SetFieldRequest request) {
         try {
             userService.setField(request);
             return ResponseEntity.accepted().build();
@@ -93,7 +93,7 @@ public class UserController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class)))
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @GetMapping("/me")
-    public ResponseEntity<?> getByPhone() {
+    public ResponseEntity<?> getCurrent() {
         try {
             return ResponseEntity.ok().body(userService.getCurrentUser());
         } catch (Exception e){

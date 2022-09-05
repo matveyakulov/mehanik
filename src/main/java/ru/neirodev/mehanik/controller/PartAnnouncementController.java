@@ -73,8 +73,8 @@ public class PartAnnouncementController {
     @Operation(summary = "Список объявлений о продаже у текущего пользователя")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PartAnnouncementDTO.class)))
-    @GetMapping("/me")
-    public List<PartAnnouncementDTO> getAllCurrentDTO(
+    @GetMapping("/DTO")
+    public List<PartAnnouncementDTO> getAllDTO(
             @Parameter(description = "Номер страницы(с 0)")
             @RequestParam(required = false) final Integer pageNum,
             @Parameter(description = "Размер страницы(с 1)")
@@ -83,15 +83,15 @@ public class PartAnnouncementController {
             @RequestParam(required = false) final Boolean archive) {
         if (pageSize != null && pageSize > 0 && pageNum != null && pageNum > -1) {
             Pageable pageable = PageRequest.of(pageNum, pageSize);
-            return partAnnouncementService.getAllCurrentDTO(pageable, archive);
+            return partAnnouncementService.getAllDTO(pageable, archive);
         }
-        return partAnnouncementService.getAllCurrentDTO(archive);
+        return partAnnouncementService.getAllDTO(archive);
     }
 
     @Operation(summary = "Получение объявления по id")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PartAnnouncementEntity.class)))
-    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Пользователь с таким id не найден")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Объявление с таким id не найден")
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable final Long id) {
         Optional<PartAnnouncementEntity> partAnnouncement = partAnnouncementService.findById(id);
@@ -109,6 +109,20 @@ public class PartAnnouncementController {
     public ResponseEntity<?> save(@RequestBody final PartAnnouncementEntity partAnnouncementEntity) {
         try {
             return ResponseEntity.ok().body(partAnnouncementService.save(partAnnouncementEntity));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER')")
+    @Operation(summary = "Обновление объявления")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+    @PostMapping
+    public ResponseEntity<?> update(@RequestBody final PartAnnouncementEntity partAnnouncementEntity) {
+        try {
+            partAnnouncementService.update(partAnnouncementEntity);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -134,8 +148,7 @@ public class PartAnnouncementController {
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Объявление с таким id не найдено")
     @PostMapping("/{id}/archive")
     public ResponseEntity<?> addToArchive(@PathVariable final Long id) {
-        Optional<PartAnnouncementEntity> partAnnouncement = partAnnouncementService.findById(id);
-        if (partAnnouncement.isPresent()) {
+        if (partAnnouncementService.existsById(id)) {
             partAnnouncementService.addToArchive(id);
             return ResponseEntity.ok().build();
         }

@@ -13,15 +13,17 @@ import java.util.Optional;
 @Repository
 public interface PartAnnouncementFavoritesRepository extends JpaRepository<PartAnnouncementFavoriteEntity, Long> {
 
-    @Query("SELECT new ru.neirodev.mehanik.dto.PartAnnouncementDTO(pa.id, pa.type, pa.brand, pa.generation, pa.model, pa.nameOfPart, " +
-            "pa.numberOfPart, pa.photo, pa.address, pa.price, pa.dateCreate, pa.archive) " +
+    @Query("SELECT new ru.neirodev.mehanik.dto.PartAnnouncementDTO(pa.id, pa.type, pa.brand, pa.model, " +
+            "pa.generation, pa.nameOfPart, pa.numberOfPart, pa.city, pa.photo, pa.address, pa.price, pa.dateCreate, pa.archive, " +
+            "pa.longitude, pa.latitude) " +
             "FROM PartAnnouncementEntity pa " +
             "JOIN PartAnnouncementFavoriteEntity paf ON pa.id = paf.partsAnnouncementId " +
             "WHERE paf.userId = :id")
     List<PartAnnouncementDTO> getAllDTO(Long id);
 
-    @Query("SELECT new ru.neirodev.mehanik.dto.PartAnnouncementDTO(pa.id, pa.type, pa.brand, pa.generation, pa.model, pa.nameOfPart, " +
-            "pa.numberOfPart, pa.photo, pa.address, pa.price, pa.dateCreate, pa.archive) " +
+    @Query("SELECT new ru.neirodev.mehanik.dto.PartAnnouncementDTO(pa.id, pa.type, pa.brand, pa.model, " +
+            "pa.generation, pa.nameOfPart, pa.numberOfPart, pa.city, pa.photo, pa.address, pa.price, pa.dateCreate, pa.archive, " +
+            "pa.longitude, pa.latitude) " +
             "FROM PartAnnouncementEntity pa " +
             "JOIN PartAnnouncementFavoriteEntity paf ON pa.id = paf.partsAnnouncementId " +
             "WHERE paf.userId = :id")

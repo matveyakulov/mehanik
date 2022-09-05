@@ -9,17 +9,24 @@ import java.util.Optional;
 
 public interface PartAnnouncementService {
 
-    List<PartAnnouncementDTO> getAllDTO(Boolean archive);
-    List<PartAnnouncementDTO> getAllDTO(Pageable pageable, Boolean archive);
+    List<PartAnnouncementDTO> getAllCurrentDTO(Boolean archive);
+
+    List<PartAnnouncementDTO> getAllCurrentDTO(Pageable pageable, Boolean archive);
 
     Optional<PartAnnouncementEntity> findById(Long id);
 
     void addToArchive(Long id);
 
     PartAnnouncementEntity save(PartAnnouncementEntity partAnnouncementEntity);
+
     void delete(PartAnnouncementEntity partAnnouncementEntity);
 
-    boolean existsById(Long id);
+    List<PartAnnouncementDTO> getAllDTO(Double userLatitude, Double userLongitude, Double radius, String city,
+                                        List<String> types, List<String> brands,
+                                        String nameOfPart, Integer startPrice, Integer endPrice, Boolean aBoolean,
+                                        Boolean condition, Boolean isCompany, Integer pageNum, Integer pageSize);
 
     void update(PartAnnouncementEntity partAnnouncementEntity);
+
+    boolean existsById(Long id);
 }

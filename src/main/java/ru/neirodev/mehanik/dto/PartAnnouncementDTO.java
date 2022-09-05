@@ -3,12 +3,14 @@ package ru.neirodev.mehanik.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
-@Schema(description = "Транспортный объект объявления о продаже")
-@AllArgsConstructor
+@Schema(description = "Запчасть к модификации машины")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PartAnnouncementDTO {
 
     @Schema(description = "id")
@@ -32,6 +34,9 @@ public class PartAnnouncementDTO {
     @Schema(description = "Номер запчасти")
     private String numberOfPart;
 
+    @Schema(description = "Название города")
+    private String city;
+
     @Schema(description = "Фото")
     private String photo;
 
@@ -46,4 +51,10 @@ public class PartAnnouncementDTO {
 
     @Schema(description = "Архивность")
     private Boolean archive;
+
+    @Schema(description = "Широта")
+    private Double latitude;
+
+    @Schema(description = "Долгота")
+    private Double longitude;
 }

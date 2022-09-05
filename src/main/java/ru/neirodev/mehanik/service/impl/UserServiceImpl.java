@@ -98,11 +98,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     @Override
     public double getRatingById(Long id) {
-        Long count = userRatingRepository.countByUserToId(id);
-        if(count > 0) {
-            return userRatingRepository.sumByUserToId(id) / count;
-        }
-        return 0;
+        return userRepository.getRatingById(id);
     }
 
     @Transactional

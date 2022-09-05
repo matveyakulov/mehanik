@@ -10,6 +10,7 @@ import java.util.Optional;
 public interface PartAnnouncementService {
 
     List<PartAnnouncementDTO> getAllCurrentDTO(Boolean archive);
+
     List<PartAnnouncementDTO> getAllCurrentDTO(Pageable pageable, Boolean archive);
 
     Optional<PartAnnouncementEntity> findById(Long id);
@@ -17,9 +18,11 @@ public interface PartAnnouncementService {
     void addToArchive(Long id);
 
     PartAnnouncementEntity save(PartAnnouncementEntity partAnnouncementEntity);
+
     void delete(PartAnnouncementEntity partAnnouncementEntity);
 
-    List<PartAnnouncementDTO> getAllDTO(String city, List<String> types, List<String> brands, String nameOfPart,
-                                        Integer startPrice, Integer endPrice, Boolean aBoolean, Boolean condition,
-                                        Boolean isCompany, Integer pageNum, Integer pageSize);
+    List<PartAnnouncementDTO> getAllDTO(Double userLatitude, Double userLongitude, Double radius, String city,
+                                        List<String> types, List<String> brands,
+                                        String nameOfPart, Integer startPrice, Integer endPrice, Boolean aBoolean,
+                                        Boolean condition, Boolean isCompany, Integer pageNum, Integer pageSize);
 }

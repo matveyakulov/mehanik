@@ -37,6 +37,12 @@ public class PartAnnouncementController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PartAnnouncementDTO.class)))
     @GetMapping
     public List<PartAnnouncementDTO> getAllDTO(
+            @Parameter(description = "Широта пользователя(обязателен, если нужна фильтрация по радиусу)")
+            @RequestParam(required = false) final Double userLatitude,
+            @Parameter(description = "Долгота пользователя(обязателен, если нужна фильтрация по радиусу)")
+            @RequestParam(required = false) final Double userLongitude,
+            @Parameter(description = "Радиус поиска")
+            @RequestParam(required = false) final Double radius,
             @Parameter(description = "Город, который в приоритете (не передавать, если не нужен приоритет)")
             @RequestParam(required = false) final String city,
             @Parameter(description = "Типы ТС", required = true)
@@ -59,8 +65,8 @@ public class PartAnnouncementController {
             @RequestParam final Integer pageNum,
             @Parameter(description = "Размер страницы(с 1)")
             @RequestParam final Integer pageSize) {
-        return partAnnouncementService.getAllDTO(
-                city, types, brands, nameOfPart, startPrice, endPrice, condition, isCompany, original, pageNum, pageSize);
+        return partAnnouncementService.getAllDTO(userLatitude, userLongitude, radius, city, types, brands, nameOfPart,
+                startPrice, endPrice, condition, isCompany, original, pageNum, pageSize);
     }
 
     @PreAuthorize("hasAnyAuthority('USER')")

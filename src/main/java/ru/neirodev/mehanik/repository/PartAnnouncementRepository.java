@@ -13,19 +13,22 @@ import java.util.List;
 public interface PartAnnouncementRepository extends JpaRepository<PartAnnouncementEntity, Long> {
 
     @Query(value = "SELECT new ru.neirodev.mehanik.dto.PartAnnouncementDTO(pa.id, pa.type, pa.brand, pa.model," +
-            "pa.generation, pa.nameOfPart, pa.numberOfPart, pa.photo, pa.address, pa.city, pa.price, pa.dateCreate, pa.archive) " +
+            "pa.generation, pa.nameOfPart, pa.numberOfPart, pa.city, pa.photo, pa.address, pa.price, pa.dateCreate, pa.archive, " +
+            "pa.longitude, pa.latitude) " +
             "FROM PartAnnouncementEntity pa " +
             "WHERE pa.archive = :archive OR :archive IS NULL AND pa.ownerId = :userId")
     List<PartAnnouncementDTO> getAllCurrentDTO(Pageable pageable, Boolean archive, Long userId);
 
     @Query(value = "SELECT new ru.neirodev.mehanik.dto.PartAnnouncementDTO(pa.id, pa.type, pa.brand, pa.model," +
-            "pa.generation, pa.nameOfPart, pa.numberOfPart, pa.photo, pa.address, pa.city, pa.price, pa.dateCreate, pa.archive) " +
+            "pa.generation, pa.nameOfPart, pa.numberOfPart, pa.city, pa.photo, pa.address, pa.price, pa.dateCreate, pa.archive, " +
+            "pa.longitude, pa.latitude) " +
             "FROM PartAnnouncementEntity pa " +
             "WHERE pa.archive = :archive OR :archive IS NULL AND pa.ownerId = :userId")
     List<PartAnnouncementDTO> getAllCurrentDTO(Boolean archive, Long userId);
 
     @Query(value = "SELECT new ru.neirodev.mehanik.dto.PartAnnouncementDTO(pa.id, pa.type, pa.brand, pa.model, " +
-            "pa.generation, pa.nameOfPart, pa.numberOfPart, pa.photo, pa.address, pa.city, pa.price, pa.dateCreate, pa.archive) " +
+            "pa.generation, pa.nameOfPart, pa.numberOfPart, pa.city, pa.photo, pa.address, pa.price, pa.dateCreate, pa.archive, " +
+            "pa.longitude, pa.latitude) " +
             "FROM PartAnnouncementEntity pa " +
             "WHERE pa.type IN :types AND pa.brand IN :brands AND (pa.nameOfPart = :nameOfPart OR :nameOfPart IS NULL) " +
             "AND (pa.price >= :startPrice OR :startPrice IS NULL) AND (pa.price <= :endPrice OR :endPrice IS NULL) " +

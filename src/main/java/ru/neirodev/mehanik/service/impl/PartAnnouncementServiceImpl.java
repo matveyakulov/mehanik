@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ru.neirodev.mehanik.util.GPSUtils.getDistance;
+
 @Service
 public class PartAnnouncementServiceImpl implements PartAnnouncementService {
 
@@ -75,11 +77,16 @@ public class PartAnnouncementServiceImpl implements PartAnnouncementService {
     @Transactional(readOnly = true)
     @Override
     public List<PartAnnouncementDTO> getAllDTO(
-            String city, List<String> types, List<String> brands, String nameOfPart, Integer startPrice, Integer endPrice,
-            Boolean condition, Boolean isCompany, Boolean original, Integer pageNum, Integer pageSize) {
+            Double userLatitude, Double userLongitude, Double radius, String city, List<String> types, List<String> brands, String nameOfPart, Integer startPrice,
+            Integer endPrice, Boolean condition, Boolean isCompany, Boolean original, Integer pageNum, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.Direction.ASC, "dateCreate");
         List<PartAnnouncementDTO> dtos = partAnnouncementRepository.getAllDTO(types, brands, nameOfPart,
                 startPrice, endPrice, condition, original, isCompany, pageable);
+        if (radius != null && userLongitude != null && userLatitude != null) {
+            dtos = dtos.stream()
+                    .filter(dto -> getDistance(userLongitude, userLatitude, dto.getLongitude(), dto.getLatitude()) <= radius)
+                    .collect(Collectors.toList());
+        }
         if (city != null) {
             LinkedList<PartAnnouncementDTO> partAnnouncementDTOS = dtos.stream()
                     .filter(dto -> dto.getCity().equals(city))

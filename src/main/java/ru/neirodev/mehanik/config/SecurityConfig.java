@@ -13,6 +13,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import ru.neirodev.mehanik.security.JwtFilter;
 
+import javax.servlet.http.HttpServletResponse;
+
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -26,6 +28,22 @@ public class SecurityConfig {
         http = http
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and();
+
+        http = http
+                .exceptionHandling()
+                .accessDeniedHandler((request, response, ex) -> {
+                    response.sendError(
+                            HttpServletResponse.SC_FORBIDDEN,
+                            "Доступ Запрещен"
+                    );
+                })
+                .authenticationEntryPoint((request, response, ex) -> {
+                    response.sendError(
+                            HttpServletResponse.SC_UNAUTHORIZED,
+                            "Unauthorized"
+                    );
+                })
                 .and();
 
         http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);

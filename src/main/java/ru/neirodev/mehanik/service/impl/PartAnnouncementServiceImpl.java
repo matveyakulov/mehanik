@@ -4,12 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.neirodev.mehanik.dto.PartAnnouncementDTO;
 import ru.neirodev.mehanik.entity.PartAnnouncementEntity;
 import ru.neirodev.mehanik.repository.PartAnnouncementRepository;
+import ru.neirodev.mehanik.security.JwtTokenUtil;
 import ru.neirodev.mehanik.service.PartAnnouncementService;
 
 import java.util.LinkedList;
@@ -32,14 +32,14 @@ public class PartAnnouncementServiceImpl implements PartAnnouncementService {
     @Transactional(readOnly = true)
     @Override
     public List<PartAnnouncementDTO> getAllCurrentDTO(Boolean archive) {
-        Long id = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long id = JwtTokenUtil.getUserIdFromPrincipal();
         return partAnnouncementRepository.getAllCurrentDTO(archive, id);
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<PartAnnouncementDTO> getAllCurrentDTO(Pageable pageable, Boolean archive) {
-        Long id = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long id = JwtTokenUtil.getUserIdFromPrincipal();
         return partAnnouncementRepository.getAllCurrentDTO(pageable, archive, id);
     }
 
@@ -53,7 +53,7 @@ public class PartAnnouncementServiceImpl implements PartAnnouncementService {
     @Override
     public void addToArchive(Long id) {
         PartAnnouncementEntity partAnnouncementEntity = partAnnouncementRepository.getReferenceById(id);
-        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = JwtTokenUtil.getUserIdFromPrincipal();
         if (userId.equals(partAnnouncementEntity.getOwnerId())) {
             partAnnouncementEntity.setArchive(!partAnnouncementEntity.getArchive());
         }
@@ -68,7 +68,7 @@ public class PartAnnouncementServiceImpl implements PartAnnouncementService {
     @Transactional
     @Override
     public void update(PartAnnouncementEntity partAnnouncementEntity) {
-        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = JwtTokenUtil.getUserIdFromPrincipal();
         if (userId.equals(partAnnouncementEntity.getOwnerId())) {
             partAnnouncementRepository.save(partAnnouncementEntity);
         }
@@ -82,8 +82,14 @@ public class PartAnnouncementServiceImpl implements PartAnnouncementService {
 
     @Transactional
     @Override
+    public void deleteById(Long id) {
+        partAnnouncementRepository.deleteById(id);
+    }
+
+    @Transactional
+    @Override
     public void delete(PartAnnouncementEntity partAnnouncementEntity) {
-        Long id = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long id = JwtTokenUtil.getUserIdFromPrincipal();
         if (id.equals(partAnnouncementEntity.getOwnerId())) {
             partAnnouncementRepository.delete(partAnnouncementEntity);
         }

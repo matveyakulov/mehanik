@@ -13,8 +13,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import ru.neirodev.mehanik.security.JwtFilter;
 
-import javax.servlet.http.HttpServletResponse;
-
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -23,42 +21,19 @@ public class SecurityConfig {
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http = http.cors().and().csrf().disable();
+        http = http.csrf().disable();
 
         http = http
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and();
 
-        http = http
-                .exceptionHandling()
-                .accessDeniedHandler((request, response, ex) -> {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Доступ Запрещен");
-                    response.sendError(
-                            HttpServletResponse.SC_FORBIDDEN,
-                            "Доступ Запрещен"
-                    );
-                })
-                .authenticationEntryPoint((request, response, ex) -> {
-                    response.sendError(
-                            HttpServletResponse.SC_UNAUTHORIZED,
-//                            ex.getMessage()
-                            "Unauthorized"
-                    );
-                })
-                .and();
-
-        // Set permissions on endpoints
-        http
-                .authorizeRequests()
-                .anyRequest().permitAll(); //поставил так для гостевого доступа
-
         http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
     @Bean
-    public JwtFilter authenticationTokenFilterBean() throws Exception {
+    public JwtFilter authenticationTokenFilterBean() {
         return new JwtFilter();
     }
 

@@ -25,4 +25,6 @@ public interface ServiceAnnouncementService {
     void update(ServiceAnnouncementDTO serviceAnnouncementDTO, ServiceAnnouncementEntity serviceAnnouncement);
 
     void setField(SetFieldRequest request);
+
+    void deleteById(Long id);
 }

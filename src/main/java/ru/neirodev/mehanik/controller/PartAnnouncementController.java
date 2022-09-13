@@ -8,24 +8,23 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.neirodev.mehanik.dto.PartAnnouncementDTO;
 import ru.neirodev.mehanik.entity.PartAnnouncementEntity;
 import ru.neirodev.mehanik.service.PartAnnouncementService;
 
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-import java.util.Optional;
-
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
 @RequestMapping("/partAnnouncements")
 public class PartAnnouncementController {
 
     private final PartAnnouncementService partAnnouncementService;
+
+    private final String NOT_FOUND_MESSAGE = "Объявление с таким id не найдено";
 
     @Autowired
     public PartAnnouncementController(PartAnnouncementService partAnnouncementService) {
@@ -91,14 +90,11 @@ public class PartAnnouncementController {
     @Operation(summary = "Получение объявления по id")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PartAnnouncementEntity.class)))
-    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Объявление с таким id не найден")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = NOT_FOUND_MESSAGE)
     @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable final Long id) {
-        Optional<PartAnnouncementEntity> partAnnouncement = partAnnouncementService.findById(id);
-        if (partAnnouncement.isPresent()) {
-            return ResponseEntity.ok().body(partAnnouncement.get());
-        }
-        return new ResponseEntity<>("Объявление с таким id не найдено", NOT_FOUND);
+    public PartAnnouncementEntity getById(@PathVariable final Long id) {
+        return partAnnouncementService.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(NOT_FOUND_MESSAGE));
     }
 
     @PreAuthorize("hasAnyAuthority('USER')")
@@ -106,12 +102,8 @@ public class PartAnnouncementController {
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody final PartAnnouncementEntity partAnnouncementEntity) {
-        try {
-            return ResponseEntity.ok().body(partAnnouncementService.save(partAnnouncementEntity));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public PartAnnouncementEntity save(@RequestBody final PartAnnouncementEntity partAnnouncementEntity) {
+        return partAnnouncementService.save(partAnnouncementEntity);
     }
 
     @PreAuthorize("hasAnyAuthority('USER')")
@@ -119,40 +111,33 @@ public class PartAnnouncementController {
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @PutMapping
-    public ResponseEntity<?> update(@RequestBody final PartAnnouncementEntity partAnnouncementEntity) {
-        try {
-            partAnnouncementService.update(partAnnouncementEntity);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public void update(@RequestBody final PartAnnouncementEntity partAnnouncementEntity) {
+        partAnnouncementService.update(partAnnouncementEntity);
     }
 
     @PreAuthorize("hasAnyAuthority('USER')")
     @Operation(summary = "Удаление объявления(если текущий пользователь создавал его)")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
-    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Объявление с таким id не найдено")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = NOT_FOUND_MESSAGE)
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteById(@PathVariable final Long id) {
-        Optional<PartAnnouncementEntity> partAnnouncement = partAnnouncementService.findById(id);
-        if (partAnnouncement.isPresent()) {
-            partAnnouncementService.delete(partAnnouncement.get());
-            return ResponseEntity.ok().build();
+    public void deleteById(@PathVariable final Long id) {
+        if (partAnnouncementService.existsById(id)) {
+            partAnnouncementService.deleteById(id);
+        } else {
+            throw new EntityNotFoundException(NOT_FOUND_MESSAGE);
         }
-        return new ResponseEntity<>("Объявление с таким id не найдено", NOT_FOUND);
     }
 
     @PreAuthorize("hasAnyAuthority('USER')")
     @Operation(summary = "Архивирование / разархивирование объявления(если текущий пользователь создавал его)")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
-    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Объявление с таким id не найдено")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = NOT_FOUND_MESSAGE)
     @PostMapping("/{id}/archive")
-    public ResponseEntity<?> addToArchive(@PathVariable final Long id) {
+    public void addToArchive(@PathVariable final Long id) {
         if (partAnnouncementService.existsById(id)) {
             partAnnouncementService.addToArchive(id);
-            return ResponseEntity.ok().build();
         }
-        return new ResponseEntity<>("Объявление с таким id не найдено", NOT_FOUND);
+        throw new EntityNotFoundException(NOT_FOUND_MESSAGE);
     }
 
 }

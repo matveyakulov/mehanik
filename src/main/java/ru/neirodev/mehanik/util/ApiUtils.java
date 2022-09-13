@@ -7,7 +7,7 @@ import ru.neirodev.mehanik.api.model.Part;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RestUtils {
+public class ApiUtils {
 
     public static final String PARTSAPI_RU_API_PHP = "https://partsapi.ru/api.php";
 

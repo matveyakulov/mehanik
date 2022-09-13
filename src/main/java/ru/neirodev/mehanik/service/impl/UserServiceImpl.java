@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<UserEntity> getById(Long id) {
+    public Optional<UserEntity> findById(Long id) {
         Optional<UserEntity> repUser = userRepository.findById(id);
         repUser.ifPresent(user -> user.setRating(getRatingById(id)));
         return repUser;
@@ -115,5 +115,17 @@ public class UserServiceImpl implements UserService {
     public Optional<UserRatingEntity> getRatingRowByUserToId(Long userToId) {
         Long userFromId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userRatingRepository.findUserRatingByUserFromIdAndUserToId(userFromId, userToId);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public boolean existsById(Long id) {
+        return userRepository.existsById(id);
+    }
+
+    @Transactional
+    @Override
+    public void deleteById(Long id) {
+        userRepository.deleteById(id);
     }
 }

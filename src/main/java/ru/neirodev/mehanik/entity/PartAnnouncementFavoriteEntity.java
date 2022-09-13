@@ -5,10 +5,7 @@ import lombok.Data;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.JoinColumn;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Schema(description = "Избранное объявление о продаже")
 @EntityListeners(AuditingEntityListener.class)
@@ -17,12 +14,12 @@ import javax.persistence.Table;
 @Data
 public class PartAnnouncementFavoriteEntity extends BaseEntity{
 
+    @CreatedBy
     @Schema(description = "id пользователя", accessMode = Schema.AccessMode.READ_ONLY)
-    @JoinColumn(name = "user_id", updatable = false)
+    @Column(name = "user_id", updatable = false)
     private Long userId;
 
-    @CreatedBy
     @Schema(description = "id объявления о продаже")
-    @JoinColumn(name = "parts_announcement_id", updatable = false)
+    @Column(name = "parts_announcement_id", updatable = false)
     private Long partsAnnouncementId;
 }

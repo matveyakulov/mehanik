@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.neirodev.mehanik.dto.PartAnnouncementDTO;
 import ru.neirodev.mehanik.entity.PartAnnouncementFavoriteEntity;
 import ru.neirodev.mehanik.repository.PartAnnouncementFavoritesRepository;
+import ru.neirodev.mehanik.security.JwtTokenUtil;
 import ru.neirodev.mehanik.service.PartAnnouncementFavoriteService;
 
 import javax.persistence.EntityNotFoundException;
@@ -27,14 +28,14 @@ public class PartAnnouncementFavoriteServiceImpl implements PartAnnouncementFavo
     @Transactional(readOnly = true)
     @Override
     public List<PartAnnouncementDTO> getAllDTO() {
-        Long id = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long id = JwtTokenUtil.getUserIdFromPrincipal();
         return partAnnouncementFavoritesRepository.getAllDTO(id);
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<PartAnnouncementDTO> getAllDTO(Pageable pageable) {
-        Long id = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long id = JwtTokenUtil.getUserIdFromPrincipal();
         return partAnnouncementFavoritesRepository.getAllDTO(id, pageable);
     }
 
@@ -60,5 +61,17 @@ public class PartAnnouncementFavoriteServiceImpl implements PartAnnouncementFavo
     @Override
     public Optional<PartAnnouncementFavoriteEntity> findById(Long id) {
         return partAnnouncementFavoritesRepository.findById(id);
+    }
+
+    @Transactional
+    @Override
+    public void deleteById(Long partAnnouncementId) {
+        partAnnouncementFavoritesRepository.deleteById(partAnnouncementId);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public boolean existsById(Long partAnnouncementId) {
+        return partAnnouncementFavoritesRepository.existsById(partAnnouncementId);
     }
 }

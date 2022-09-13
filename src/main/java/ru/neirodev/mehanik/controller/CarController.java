@@ -8,30 +8,29 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.neirodev.mehanik.entity.CarEntity;
 import ru.neirodev.mehanik.service.CarService;
 
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-import java.util.Optional;
-
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
 @RequestMapping("/cars")
+@PreAuthorize("hasAnyAuthority('USER')")
 public class CarController {
 
     private final CarService carService;
+
+    private final String NOT_FOUND_MESSAGE = "Машина с таким id не найдена";
 
     @Autowired
     public CarController(CarService carService) {
         this.carService = carService;
     }
 
-    @PreAuthorize("hasAnyAuthority('USER')")
     @Operation(summary = "Список список машин у текущего пользователя")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK,
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CarEntity.class)))
@@ -48,33 +47,24 @@ public class CarController {
         return carService.getAll();
     }
 
-    @PreAuthorize("hasAnyAuthority('USER')")
     @Operation(summary = "Добавление машины в гараж")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody final CarEntity car) {
-        try {
-            return ResponseEntity.ok().body(carService.save(car));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public CarEntity save(@RequestBody final CarEntity car) {
+        return carService.save(car);
     }
 
-    @PreAuthorize("hasAnyAuthority('USER')")
     @Operation(summary = "Удаление машины из гаража")
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_OK)
-    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = "Машина с таким id не найдена")
+    @ApiResponse(responseCode = "" + HttpServletResponse.SC_NOT_FOUND, description = NOT_FOUND_MESSAGE)
     @ApiResponse(responseCode = "" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteById(@PathVariable final Long id) {
-        Optional<CarEntity> repCar = carService.findById(id);
-        if (repCar.isPresent()) {
-            carService.delete(repCar.get());
-            return ResponseEntity.ok().build();
+    public void deleteById(@PathVariable final Long id) {
+        if (carService.existsById(id)) {
+            carService.deleteById(id);
         } else {
-            return new ResponseEntity<>("Машина с таким id не найдена", NOT_FOUND);
+            throw new EntityNotFoundException(NOT_FOUND_MESSAGE);
         }
-
     }
 }

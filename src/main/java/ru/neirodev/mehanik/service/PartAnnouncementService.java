@@ -29,4 +29,6 @@ public interface PartAnnouncementService {
     void update(PartAnnouncementEntity partAnnouncementEntity);
 
     boolean existsById(Long id);
+
+    void deleteById(Long id);
 }

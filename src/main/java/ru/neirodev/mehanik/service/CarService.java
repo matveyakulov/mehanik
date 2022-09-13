@@ -15,4 +15,8 @@ public interface CarService {
 
     CarEntity save(CarEntity car);
     void delete(CarEntity    car);
+
+    void deleteById(Long id);
+
+    boolean existsById(Long id);
 }

@@ -17,7 +17,6 @@ import javax.persistence.*;
 public class ServiceAnnouncementCarTypeEntity extends BaseEntity{
 
     @Schema(description = "id объявления")
-    @JoinColumn(name = "service_announcement_id")
     @Column(name = "service_announcement_id")
     private Long serviceAnnouncementId;
 

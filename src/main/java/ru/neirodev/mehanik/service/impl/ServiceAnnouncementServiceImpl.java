@@ -2,7 +2,6 @@ package ru.neirodev.mehanik.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.neirodev.mehanik.dto.ServiceAnnouncementDTO;
@@ -12,6 +11,7 @@ import ru.neirodev.mehanik.entity.ServiceAnnouncementEntity;
 import ru.neirodev.mehanik.enums.ServiceType;
 import ru.neirodev.mehanik.mapper.ServiceAnnouncementMapper;
 import ru.neirodev.mehanik.repository.ServiceAnnouncementRepository;
+import ru.neirodev.mehanik.security.JwtTokenUtil;
 import ru.neirodev.mehanik.service.ServiceAnnouncementService;
 
 import javax.persistence.EntityNotFoundException;
@@ -71,7 +71,7 @@ public class ServiceAnnouncementServiceImpl implements ServiceAnnouncementServic
         Optional<ServiceAnnouncementEntity> repServiceAnnouncement = serviceAnnouncementRepository.findById(request.getId());
         if (repServiceAnnouncement.isPresent()) {
             ServiceAnnouncementEntity serviceAnnouncement = repServiceAnnouncement.get();
-            Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Long userId = JwtTokenUtil.getUserIdFromPrincipal();
             if (userId.equals(serviceAnnouncement.getOwnerId())) {
                 try {
                     Field field = ServiceAnnouncementEntity.class.getDeclaredField(request.getFieldName());
@@ -88,8 +88,14 @@ public class ServiceAnnouncementServiceImpl implements ServiceAnnouncementServic
 
     @Transactional
     @Override
+    public void deleteById(Long id) {
+        serviceAnnouncementRepository.deleteById(id);
+    }
+
+    @Transactional
+    @Override
     public void update(ServiceAnnouncementDTO serviceAnnouncementDTO, ServiceAnnouncementEntity serviceAnnouncementEntity) {
-        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = JwtTokenUtil.getUserIdFromPrincipal();
         if (userId.equals(serviceAnnouncementEntity.getOwnerId())) {
             ServiceAnnouncementMapper.INSTANCE.updateServiceAnnouncementFromDTO(serviceAnnouncementDTO, serviceAnnouncementEntity);
             serviceAnnouncementRepository.save(serviceAnnouncementEntity);

@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface UserService {
 
-    Optional<UserEntity> getById(Long id);
+    Optional<UserEntity> findById(Long id);
 
     UserEntity save(UserDTO userDTO);
 
@@ -28,4 +28,8 @@ public interface UserService {
     void addRatingRow(Long id, Double value);
 
     Optional<UserRatingEntity> getRatingRowByUserToId(Long userToId);
+
+    boolean existsById(Long id);
+
+    void deleteById(Long id);
 }

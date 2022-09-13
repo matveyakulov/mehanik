@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.springframework.http.HttpMethod.GET;
-import static ru.neirodev.mehanik.util.RestUtils.deleteAttributes;
-import static ru.neirodev.mehanik.util.RestUtils.getCarParts;
+import static ru.neirodev.mehanik.util.ApiUtils.deleteAttributes;
+import static ru.neirodev.mehanik.util.ApiUtils.getCarParts;
 
 @Service
 public class ApiServiceImpl implements ApiService {

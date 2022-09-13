@@ -15,4 +15,8 @@ public interface PartAnnouncementFavoriteService {
     void delete(Long partAnnouncementId);
 
     Optional<PartAnnouncementFavoriteEntity> findById(Long id);
+
+    void deleteById(Long partAnnouncementId);
+
+    boolean existsById(Long partAnnouncementId);
 }

@@ -18,9 +18,9 @@ import ru.neirodev.mehanik.security.JwtTokenUtil;
 import ru.neirodev.mehanik.service.AuthService;
 import ru.neirodev.mehanik.service.UserService;
 
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -74,15 +74,13 @@ public class AuthController {
             @Parameter(name = "Код подтверждения")
             @RequestParam final String code,
             final HttpServletRequest request, final HttpServletResponse response) {
-        Optional<UserEntity> user = userService.findByPhone(phone);
-        if (user.isPresent()) {
-            if (user.get().getSmscode().equals(code)) {
-                return ResponseEntity.ok().body(authService.startSession(user.get(), request, response));
-            } else {
-                return ResponseEntity.badRequest().body("Неверный код");
-            }
+        UserEntity user = userService.findByPhone(phone)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь с таким номером не существует"));
+        if (user.getSmscode().equals(code)) {
+            return ResponseEntity.ok().body(authService.startSession(user, request, response));
+        } else {
+            return ResponseEntity.badRequest().body("Неверный код");
         }
-        return new ResponseEntity<>("Пользователь с таким номером не существует", NOT_FOUND);
     }
 
     @Operation(summary = "Обновление access token", operationId = "refresh", description = "Метод получения нового access token для указанного refresh token")
@@ -93,23 +91,15 @@ public class AuthController {
     @ApiResponse(responseCode = ""
             + HttpServletResponse.SC_NOT_FOUND, description = "Сессия с данным refresh token'ом не найдена")
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(
+    public void refreshToken(
             @Parameter(name = "Access токен")
             @RequestParam final String refreshToken,
             final HttpServletRequest request,
             final HttpServletResponse response) {
-        try {
-            Session session = authService.refreshToken(refreshToken, request, response);
-            if (session != null) {
-                return ResponseEntity.ok().build();
-            } else {
-                return new ResponseEntity<>("Сессия с данным refresh token'ом не найдена", NOT_FOUND);
-            }
-        } catch (
-                Exception e) {
-            return ResponseEntity.internalServerError().body("Создание завершилось с ошибкой: " + e.getMessage());
+        Session session = authService.refreshToken(refreshToken, request, response);
+        if (session == null) {
+            throw new EntityNotFoundException("Сессия с данным refresh token'ом не найдена");
         }
-
     }
 
     @Operation(summary = "Закрытие пользовательской сессии",
@@ -120,12 +110,7 @@ public class AuthController {
             + JwtFilter.COOKIE_NAME + " и с пустым значением.",
             headers = @Header(name = HttpHeaders.SET_COOKIE, description = JwtFilter.COOKIE_NAME + ": пустая просроченная кука для очистки значения на клиенте", schema = @Schema(type = "string")))
     @DeleteMapping("/logout")
-    public ResponseEntity<?> logout(final HttpServletRequest request, final HttpServletResponse response) {
-        try {
-            authService.logout(request, response);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Создание завершилось с ошибкой: " + e.getMessage());
-        }
+    public void logout(final HttpServletRequest request, final HttpServletResponse response) throws Exception {
+        authService.logout(request, response);
     }
 }
